@@ -15,6 +15,13 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
+
+// 设置行间距比例，行间距 ＝ 行间距比例＊字体大小 default ＝ 0.4
+#define kSMLINEHEIGHT_SCALE (.4)
+
+// 计算文本的最大行高，默认为：1000,如果视图内容可能超过这个高度可自行调节
+#define kSMLabel_MAXHEIGHT (1000)
+
 @class SMLabel;
 @protocol SMLabelDelegate <NSObject>
 
@@ -59,9 +66,9 @@
 
 @interface SMLabel : UILabel
 
-@property(nonatomic,assign)id<SMLabelDelegate> delegate;//代理对象
-@property(nonatomic,assign)CGFloat linespace;//行间距   default = 10.0f
-@property(nonatomic,assign)CGFloat mutiHeight;//行高(倍数) default = 1.0f
+@property(nonatomic, assign)id<SMLabelDelegate> delegate;   //代理对象
+@property(nonatomic, assign, readonly)CGFloat linespace;    //行间距      default = 当前字体的大小 ＊ kSMLINEHEIGHT_SCALE
+@property(nonatomic, assign, readonly)CGFloat lineHeight;   //行高        default = 当前字体的大小
 
 // 自适应内容的高度
 - (void)sizeToFit;

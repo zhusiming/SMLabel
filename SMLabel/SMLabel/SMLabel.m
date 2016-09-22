@@ -117,18 +117,23 @@
     
     
     //行距
-    self.linespace = 10.0f;
+    _linespace = self.font.pointSize * kSMLINEHEIGHT_SCALE;
     CTParagraphStyleSetting lineSpaceSetting;
     lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacing;
     lineSpaceSetting.value = &_linespace;
     lineSpaceSetting.valueSize = sizeof(_linespace);
     
-    //多行高
-    self.mutiHeight = 1.0f;
-    CTParagraphStyleSetting Muti;
-    Muti.spec = kCTParagraphStyleSpecifierLineHeightMultiple;
-    Muti.value = &_mutiHeight;
-    Muti.valueSize = sizeof(float);
+    //设置行高
+    _lineHeight = self.font.pointSize;
+    CTParagraphStyleSetting MinLineHeight;
+    MinLineHeight.spec = kCTParagraphStyleSpecifierMinimumLineHeight;
+    MinLineHeight.value = &_lineHeight;
+    MinLineHeight.valueSize = sizeof(_lineHeight);
+    
+    CTParagraphStyleSetting MaxLineHeight;
+    MaxLineHeight.spec = kCTParagraphStyleSpecifierMaximumLineHeight;
+    MaxLineHeight.value = &_lineHeight;
+    MaxLineHeight.valueSize = sizeof(_lineHeight);
     
     //换行模式
     CTParagraphStyleSetting lineBreakMode;
@@ -139,11 +144,11 @@
     
     //组合设置
     CTParagraphStyleSetting settings[] = {
-        lineSpaceSetting,Muti,alignmentStyle,lineBreakMode
+        lineSpaceSetting,MinLineHeight,MaxLineHeight,alignmentStyle,lineBreakMode
     };
     
     //通过设置项产生段落样式对象
-    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, 4);
+    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, 5);
     
     // build attributes
     NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithObject:(__bridge id)style forKey:(id)kCTParagraphStyleAttributeName ];
@@ -444,7 +449,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     }
     
     //如果点击在当前行文字的上方空白位置
-//    if (point.y <= indexLine *lineHeight + (asc+des+lead) * (_mutiHeight - 1.0f)) {
+//    if (point.y <= indexLine *lineHeight + (asc+des+lead) * (_lineHeight - 1.0f)) {
 //        return NSMakeRange(0, 0);
 //    }
     
@@ -585,18 +590,24 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     
     //行距
-    float linespace = 10.0f;
+    float linespace = font.pointSize * kSMLINEHEIGHT_SCALE;
     CTParagraphStyleSetting lineSpaceSetting;
     lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacing;
     lineSpaceSetting.value = &linespace;
     lineSpaceSetting.valueSize = sizeof(linespace);
     
-    //多行高
-    float mutiHeight = 1.0f;
-    CTParagraphStyleSetting Muti;
-    Muti.spec = kCTParagraphStyleSpecifierLineHeightMultiple;
-    Muti.value = &mutiHeight;
-    Muti.valueSize = sizeof(float);
+    //设置行高
+    float minximumLineHeight = font.pointSize;
+    CTParagraphStyleSetting MinLineHeight;
+    MinLineHeight.spec = kCTParagraphStyleSpecifierMinimumLineHeight;
+    MinLineHeight.value = &minximumLineHeight;
+    MinLineHeight.valueSize = sizeof(float);
+    
+    float maximumLineHeight = font.pointSize;
+    CTParagraphStyleSetting MaxLineHeight;
+    MaxLineHeight.spec = kCTParagraphStyleSpecifierMaximumLineHeight;
+    MaxLineHeight.value = &maximumLineHeight;
+    MaxLineHeight.valueSize = sizeof(float);
     
     //换行模式
     CTParagraphStyleSetting lineBreakMode;
@@ -607,11 +618,11 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     //组合设置
     CTParagraphStyleSetting settings[] = {
-        lineSpaceSetting,Muti,alignmentStyle,lineBreakMode
+        lineSpaceSetting,MinLineHeight,MaxLineHeight,alignmentStyle,lineBreakMode
     };
     
     //通过设置项产生段落样式对象
-    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, 4);
+    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, 5);
     
     // build attributes
     NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithObject:(__bridge id)style forKey:(id)kCTParagraphStyleAttributeName ];
@@ -622,7 +633,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     //生成CTFramesetterRef对象
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CGRect drawingRect = CGRectMake(0, 0, width, 1000);  //这里的高要设置足够大
+    CGRect drawingRect = CGRectMake(0, 0, width, kSMLabel_MAXHEIGHT);  //这里的高要设置足够大
     
     //然后创建一个CGPath对象，这个Path对象用于表示可绘制区域坐标值、长宽。
     CGMutablePathRef path = CGPathCreateMutable();
@@ -634,8 +645,11 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     CFRelease(framesetter);
     
     NSArray *linesArray = (NSArray *) CTFrameGetLines(textFrame);
+    return linesArray.count * font.pointSize + (linesArray.count - 1) * (font.pointSize * kSMLINEHEIGHT_SCALE);
     
+    /*
     CGPoint origins[[linesArray count]];
+    
     CTFrameGetLineOrigins(textFrame, CFRangeMake(0, 0), origins);
     
     int line_y = (int) origins[[linesArray count] -1].y;  //最后一行line的原点y坐标
@@ -647,11 +661,12 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     CTLineRef line = (__bridge CTLineRef) [linesArray objectAtIndex:[linesArray count]-1];
     CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
     
-    total_height = 1000 - line_y + (int) descent +1;    //+1为了纠正descent转换成int小数点后舍去的值
+    total_height = kSMLabel_MAXHEIGHT - line_y + (int) descent + 1;    //+1为了纠正descent转换成int小数点后舍去的值
     
     CFRelease(textFrame);
     
     return total_height;
+     */
     
 }
 

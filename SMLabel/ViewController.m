@@ -19,13 +19,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
+    self.view.backgroundColor = [UIColor orangeColor];
     // 创建一个富文本视图
     SMLabel *label = [[SMLabel alloc] initWithFrame:CGRectMake(0, 100, 320, 200)];
     // 设置代理对象
     label.delegate = self;
     label.font = [UIFont systemFontOfSize:16];
-    label.text = @"测试数据，这是一个富文本师徒@用户 据文混排的框架#话题#、#话题#、#话题# ，https://github.com/zhusiming 下面要现实一张图片<image url = '1.png'>图片在现实d现实d现实d现实d现实d现实d现实d现实d";
+    label.text = @"测试数据，这是一个富文本师徒@用户 据文混排的框架#话题#、#话题#、#话题# ，https://github.com/zhusiming 下面要现实一张图片<image url = '1.png'>图片在现实d现实d现实d现实d现实d现实d现实d现实dd现实d现实1123412－12测试数据，这是一个富文本师徒@用户 据文混排的框架#话题#、#话题#、#话题# ，https://github.com/zhusiming 下面要现实一张图片<image url = '1.png'>图片在现实d现实d现实d现实d现实d现实d现实d现实dd现实d现实1123412－121<image url = '1.png'>1";
     label.backgroundColor = [UIColor grayColor];
     // 获取文本的高度
     float height = [SMLabel getAttributedStringHeightWithString:label.text WidthValue:320 delegate:self font:label.font];
