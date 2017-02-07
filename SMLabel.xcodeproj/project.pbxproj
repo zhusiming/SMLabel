@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5493B1F51E49D827007C7F8D /* 2.gif in Resources */ = {isa = PBXBuildFile; fileRef = 5493B1F41E49D827007C7F8D /* 2.gif */; };
 		54BDACCE1D26457900F665B2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 54BDACCD1D26457900F665B2 /* main.m */; };
 		54BDACD11D26457900F665B2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 54BDACD01D26457900F665B2 /* AppDelegate.m */; };
 		54BDACDA1D26457900F665B2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 54BDACD81D26457900F665B2 /* Main.storyboard */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5493B1F41E49D827007C7F8D /* 2.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = 2.gif; sourceTree = "<group>"; };
 		54BDACC91D26457900F665B2 /* SMLabel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SMLabel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		54BDACCD1D26457900F665B2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		54BDACCF1D26457900F665B2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 				54BDACF41D264C0900F665B2 /* ViewController.h */,
 				54BDACF51D264C0900F665B2 /* ViewController.m */,
 				54BDACF71D264C8A00F665B2 /* 1@2x.png */,
+				5493B1F41E49D827007C7F8D /* 2.gif */,
 				54BDACED1D26483800F665B2 /* SMLabel */,
 				54BDACD81D26457900F665B2 /* Main.storyboard */,
 				54BDACDB1D26457900F665B2 /* Assets.xcassets */,
@@ -163,6 +166,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				54BDACDF1D26457900F665B2 /* LaunchScreen.storyboard in Resources */,
+				5493B1F51E49D827007C7F8D /* 2.gif in Resources */,
 				54BDACDC1D26457900F665B2 /* Assets.xcassets in Resources */,
 				54BDACF81D264C8A00F665B2 /* 1@2x.png in Resources */,
 				54BDACDA1D26457900F665B2 /* Main.storyboard in Resources */,

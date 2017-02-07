@@ -8,6 +8,7 @@
 
 #import "SMLabel.h"
 #import <CoreText/CoreText.h>
+#import <ImageIO/ImageIO.h>
 #import "RegexKitLite.h"
 #define SMLabel_IMAGE_NAME @"imageName"
 @interface SMLabel ()
@@ -20,6 +21,7 @@
 @property(nonatomic,strong)UIColor *linkColor;   //超链接文本颜色
 @property(nonatomic,strong)UIColor *passColor;   //鼠标经过链接文本颜色
 @property(nonatomic,strong)NSArray *regexStrArray;  //正则表达式 数组
+@property(nonatomic,strong)NSMutableArray *emoticonArray;  //正则表达式 数组
 @end
 
 @implementation SMLabel
@@ -55,6 +57,17 @@
 #pragma mark - 绘制视图
 - (void)drawRect:(CGRect)rect
 {
+    // 创建表情视图存储数组
+    if (self.emoticonArray == nil) {
+        self.emoticonArray = [[NSMutableArray alloc] init];
+    } else {
+        // 移除表情数组中的元素和视图
+        for (UIView *emoticonView in self.emoticonArray) {
+            [emoticonView removeFromSuperview];
+        }
+        [self.emoticonArray removeAllObjects];
+    }
+    
     //当前文本超链接文字的颜色默认为purpleColor
     self.linkColor = [UIColor purpleColor];
     //自定义当前超链接文本颜色
@@ -77,7 +90,7 @@
     [self replaceImageText];
     
     //------------------------设置字体属性--------------------------
-//    CTFontRef font = CTFontCreateWithName(CFSTR("Georgia"), 15, NULL);
+    //    CTFontRef font = CTFontCreateWithName(CFSTR("Georgia"), 15, NULL);
     //设置当前字体
     [_attrString addAttribute:(id)kCTFontAttributeName value:self.font range:NSMakeRange(0, _attrString.length)];
     //设置当前文本的颜色
@@ -90,7 +103,7 @@
     {
         //获取所有的链接文本
         NSArray *contents = [self contentsOfRegexStrArray];
-
+        
         //获取所有文本的的索引集合
         NSArray *ranges = [self rangesOfContents:contents];
         //NSLog(@"ranges %@",ranges);
@@ -98,7 +111,7 @@
             NSRange range = [value rangeValue];
             //设置字体的颜色
             [_attrString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.linkColor range:range];
-
+            
         }
         
         //设置选中经过字体颜色
@@ -160,7 +173,7 @@
     //生成CTFramesetterRef对象
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)_attrString);
     
-
+    
     //然后创建一个CGPath对象，这个Path对象用于表示可绘制区域坐标值、长宽。
     CGRect bouds = CGRectInset(self.bounds, 0.0f, 0.0f);
     CGMutablePathRef path = CGPathCreateMutable();
@@ -222,10 +235,36 @@
                     if (image) {
                         CGRect imageDrawRect;
 #warning 设置图片的大小
-                        imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
-                        imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
-                        imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * .2;
-                        CGContextDrawImage(context, imageDrawRect, image.CGImage);
+                        if (![imageName hasSuffix:@"gif"]) {
+                            imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
+                            imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
+                            imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * .2;
+                            CGContextDrawImage(context, imageDrawRect, image.CGImage);
+                        } else {
+#warning gif
+                            imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
+                            imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
+                            imageDrawRect.origin.y = self.frame.size.height - lineOrigin.y + self.font.pointSize * .2 - self.font.pointSize * 1.2;
+                            NSURL *fileUrl = [[NSBundle mainBundle] URLForResource:imageName withExtension:@""];//加载GIF图片
+                            CGImageSourceRef gifSource = CGImageSourceCreateWithURL((CFURLRef)fileUrl, NULL);//将GIF图片转换成对应的图片源
+                            size_t frameCout=CGImageSourceGetCount(gifSource);//获取其中图片源个数，即由多少帧图片组成
+                            NSMutableArray* frames=[[NSMutableArray alloc] init];//定义数组存储拆分出来的图片
+                            for (size_t i=0; i < frameCout; i++) {
+                                CGImageRef imageRef=CGImageSourceCreateImageAtIndex(gifSource, i, NULL);//从GIF图片中取出源图片
+                                UIImage* imageName=[UIImage imageWithCGImage:imageRef];//将图片源转换成UIimageView能使用的图片源
+                                [frames addObject:imageName];//将图片加入数组中
+                                CGImageRelease(imageRef);
+                            }
+                            
+                            UIImageView* emoticonImageView=[[UIImageView alloc] initWithFrame:imageDrawRect];
+                            emoticonImageView.animationImages=frames;//将图片数组加入UIImageView动画数组中
+                            emoticonImageView.animationDuration=2;//每次动画时长
+                            [emoticonImageView startAnimating];//开启动画，此处没有调用播放次数接口，UIImageView默认播放次数为无限次，故这里不做处理
+                            [self addSubview:emoticonImageView];
+                            [self.emoticonArray addObject:emoticonImageView];
+                        }
+                        
+                        
                         //                    imageDrawRect.size = CGSizeMake(image.size.height, image.size.height);
                         //                    imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
                         //                    imageDrawRect.origin.y = lineOrigin.y - 8;
@@ -241,15 +280,15 @@
     
     //－－－－－－－－－－－－－－－获取当前文本的高度－－－－－－－－－－－－－－－－－－
     //获取当前的行高
-//    float lineHeight = self.font.pointSize + self.linespace + 2;
-//    self.textHeight = CFArrayGetCount(lines) * lineHeight ;
-
+    //    float lineHeight = self.font.pointSize + self.linespace + 2;
+    //    self.textHeight = CFArrayGetCount(lines) * lineHeight ;
+    
     //释放对象
     CGPathRelease(path);
     CFRelease(framesetter);
     CFRelease(frame);
     
-
+    
 }
 #pragma mark - 检索当前图片
 //获取所有图片的字符串
@@ -320,8 +359,8 @@ CGFloat RunDelegateGetDescentCallback(void *refCon) {
 }
 //设置空白区域的宽度
 CGFloat RunDelegateGetWidthCallback(void *refCon){
-//    NSString *imageName = (__bridge NSString *)refCon;
-//    return [UIImage imageNamed:imageName].size.width;
+    //    NSString *imageName = (__bridge NSString *)refCon;
+    //    return [UIImage imageNamed:imageName].size.width;
     return 23;
 }
 #pragma mark - 检索当前链接文本
@@ -372,7 +411,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     NSRange range = [self touchInLabelText:point];
     if (range.length == 0) {
         // 点击的是非超链接文本
-//        [super touchesEnded:touches withEvent:event];
+        //        [super touchesEnded:touches withEvent:event];
         
         NSLog(@"点击的不是超链接文本");
         
@@ -405,7 +444,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     NSRange range = [self touchInLabelText:point];
     self.movieStringRange = range;
     if (range.length == 0) {
-//        [super touchesBegan:touches withEvent:event];
+        //        [super touchesBegan:touches withEvent:event];
     }else
     {
         //判断当前代理方法是否实现
@@ -416,7 +455,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
             [self.delegate toucheBenginSMLabel:self withContext:context];
         }
     }
-
+    
 }
 
 // 想实现滑动效果
@@ -451,9 +490,9 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     }
     
     //如果点击在当前行文字的上方空白位置
-//    if (point.y <= indexLine *lineHeight + (asc+des+lead) * (_lineHeight - 1.0f)) {
-//        return NSMakeRange(0, 0);
-//    }
+    //    if (point.y <= indexLine *lineHeight + (asc+des+lead) * (_lineHeight - 1.0f)) {
+    //        return NSMakeRange(0, 0);
+    //    }
     
     
     //获取当前行
@@ -531,7 +570,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
                                         font:(UIFont*)font
 {
     int total_height = 0;
-
+    
     //生成属性字符串对象
     NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc]initWithString:text];
     //设置图片属性字符串
@@ -650,24 +689,24 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     return linesArray.count * font.pointSize + (linesArray.count - 1) * (font.pointSize * kSMLINEHEIGHT_SCALE);
     
     /*
-    CGPoint origins[[linesArray count]];
-    
-    CTFrameGetLineOrigins(textFrame, CFRangeMake(0, 0), origins);
-    
-    int line_y = (int) origins[[linesArray count] -1].y;  //最后一行line的原点y坐标
-    
-    CGFloat ascent;
-    CGFloat descent;
-    CGFloat leading;
-    
-    CTLineRef line = (__bridge CTLineRef) [linesArray objectAtIndex:[linesArray count]-1];
-    CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-    
-    total_height = kSMLabel_MAXHEIGHT - line_y + (int) descent + 1;    //+1为了纠正descent转换成int小数点后舍去的值
-    
-    CFRelease(textFrame);
-    
-    return total_height;
+     CGPoint origins[[linesArray count]];
+     
+     CTFrameGetLineOrigins(textFrame, CFRangeMake(0, 0), origins);
+     
+     int line_y = (int) origins[[linesArray count] -1].y;  //最后一行line的原点y坐标
+     
+     CGFloat ascent;
+     CGFloat descent;
+     CGFloat leading;
+     
+     CTLineRef line = (__bridge CTLineRef) [linesArray objectAtIndex:[linesArray count]-1];
+     CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+     
+     total_height = kSMLabel_MAXHEIGHT - line_y + (int) descent + 1;    //+1为了纠正descent转换成int小数点后舍去的值
+     
+     CFRelease(textFrame);
+     
+     return total_height;
      */
     
 }
