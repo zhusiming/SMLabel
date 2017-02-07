@@ -184,57 +184,59 @@
     
     //获取当前行的集合
     self.row = (NSArray *)CTFrameGetLines(frame);
-    
-    CGRect lineBounds = CTLineGetImageBounds((CTLineRef)[self.row lastObject], context);
-    _lastLineWidth = lineBounds.size.width;
-    
-    //---------------------------绘制图片---------------------------
-    CFArrayRef lines = CTFrameGetLines(frame);
-    CGPoint lineOrigins[CFArrayGetCount(lines)];
-    CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), lineOrigins);
-    //NSLog(@"line count = %ld",CFArrayGetCount(lines));
-    for (int i = 0; i < CFArrayGetCount(lines); i++) {
-        CTLineRef line = CFArrayGetValueAtIndex(lines, i);
-        CGFloat lineAscent;
-        CGFloat lineDescent;
-        CGFloat lineLeading;
-        CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
-        //NSLog(@"ascent = %f,descent = %f,leading = %f",lineAscent,lineDescent,lineLeading);
+    if (self.row.count > 0) {
+        CGRect lineBounds = CTLineGetImageBounds((CTLineRef)[self.row lastObject], context);
+        _lastLineWidth = lineBounds.size.width;
         
-        CFArrayRef runs = CTLineGetGlyphRuns(line);
-        //NSLog(@"run count = %ld",CFArrayGetCount(runs));
-        for (int j = 0; j < CFArrayGetCount(runs); j++) {
-            CGFloat runAscent;
-            CGFloat runDescent;
-            CGPoint lineOrigin = lineOrigins[i];
-            CTRunRef run = CFArrayGetValueAtIndex(runs, j);
-            NSDictionary* attributes = (NSDictionary*)CTRunGetAttributes(run);
-            CGRect runRect;
-            runRect.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0,0), &runAscent, &runDescent, NULL);
-            //NSLog(@"width = %f",runRect.size.width);
+        //---------------------------绘制图片---------------------------
+        CFArrayRef lines = CTFrameGetLines(frame);
+        CGPoint lineOrigins[CFArrayGetCount(lines)];
+        CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), lineOrigins);
+        //NSLog(@"line count = %ld",CFArrayGetCount(lines));
+        for (int i = 0; i < CFArrayGetCount(lines); i++) {
+            CTLineRef line = CFArrayGetValueAtIndex(lines, i);
+            CGFloat lineAscent;
+            CGFloat lineDescent;
+            CGFloat lineLeading;
+            CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
+            //NSLog(@"ascent = %f,descent = %f,leading = %f",lineAscent,lineDescent,lineLeading);
             
-            runRect=CGRectMake(lineOrigin.x + CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL), lineOrigin.y - runDescent, runRect.size.width, runAscent + runDescent);
-            
-            NSString *imageName = [attributes objectForKey:SMLabel_IMAGE_NAME];
-            //图片渲染逻辑
-            if (imageName) {
-                UIImage *image = [UIImage imageNamed:imageName];
-                if (image) {
-                    CGRect imageDrawRect;
+            CFArrayRef runs = CTLineGetGlyphRuns(line);
+            //NSLog(@"run count = %ld",CFArrayGetCount(runs));
+            for (int j = 0; j < CFArrayGetCount(runs); j++) {
+                CGFloat runAscent;
+                CGFloat runDescent;
+                CGPoint lineOrigin = lineOrigins[i];
+                CTRunRef run = CFArrayGetValueAtIndex(runs, j);
+                NSDictionary* attributes = (NSDictionary*)CTRunGetAttributes(run);
+                CGRect runRect;
+                runRect.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0,0), &runAscent, &runDescent, NULL);
+                //NSLog(@"width = %f",runRect.size.width);
+                
+                runRect=CGRectMake(lineOrigin.x + CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL), lineOrigin.y - runDescent, runRect.size.width, runAscent + runDescent);
+                
+                NSString *imageName = [attributes objectForKey:SMLabel_IMAGE_NAME];
+                //图片渲染逻辑
+                if (imageName) {
+                    UIImage *image = [UIImage imageNamed:imageName];
+                    if (image) {
+                        CGRect imageDrawRect;
 #warning 设置图片的大小
-                    imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
-                    imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
-                    imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * .2;
-                    CGContextDrawImage(context, imageDrawRect, image.CGImage);
-//                    imageDrawRect.size = CGSizeMake(image.size.height, image.size.height);
-//                    imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
-//                    imageDrawRect.origin.y = lineOrigin.y - 8;
-//                    CGContextDrawImage(context, imageDrawRect, image.CGImage);
-
+                        imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
+                        imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
+                        imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * .2;
+                        CGContextDrawImage(context, imageDrawRect, image.CGImage);
+                        //                    imageDrawRect.size = CGSizeMake(image.size.height, image.size.height);
+                        //                    imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
+                        //                    imageDrawRect.origin.y = lineOrigin.y - 8;
+                        //                    CGContextDrawImage(context, imageDrawRect, image.CGImage);
+                        
+                    }
                 }
             }
         }
     }
+    
     
     
     //－－－－－－－－－－－－－－－获取当前文本的高度－－－－－－－－－－－－－－－－－－
