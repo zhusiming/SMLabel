@@ -30,7 +30,7 @@
     // 获取文本的高度
     float height = [SMLabel getAttributedStringHeightWithString:label.text WidthValue:320 delegate:self font:label.font];
     // 设置视图的大小
-    label.frame = CGRectMake(0, 100, 320, 10);
+    label.frame = CGRectMake(0, 100, 320, height);
     // 视图大小自适应内容大小
 //    [label sizeToFit];
 
