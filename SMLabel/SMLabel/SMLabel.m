@@ -9,7 +9,6 @@
 #import "SMLabel.h"
 #import <CoreText/CoreText.h>
 #import <ImageIO/ImageIO.h>
-#import "RegexKitLite.h"
 #define SMLabel_IMAGE_NAME @"imageName"
 @interface SMLabel ()
 
@@ -215,7 +214,7 @@
             //NSLog(@"ascent = %f,descent = %f,leading = %f",lineAscent,lineDescent,lineLeading);
             
             CFArrayRef runs = CTLineGetGlyphRuns(line);
-            //NSLog(@"run count = %ld",CFArrayGetCount(runs));
+            NSLog(@"run count = %ld",CFArrayGetCount(runs));
             for (int j = 0; j < CFArrayGetCount(runs); j++) {
                 CGFloat runAscent;
                 CGFloat runDescent;
@@ -227,7 +226,7 @@
                 //NSLog(@"width = %f",runRect.size.width);
                 
                 runRect=CGRectMake(lineOrigin.x + CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL), lineOrigin.y - runDescent, runRect.size.width, runAscent + runDescent);
-                
+                NSLog(@"%@",attributes);
                 NSString *imageName = [attributes objectForKey:SMLabel_IMAGE_NAME];
                 //图片渲染逻辑
                 if (imageName) {
@@ -236,15 +235,17 @@
                         CGRect imageDrawRect;
 #warning 设置图片的大小
                         if (![imageName hasSuffix:@"gif"]) {
-                            imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
+                            imageDrawRect.size = CGSizeMake(self.font.pointSize + 4 , self.font.pointSize + 4);
                             imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
-                            imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * .2;
+                            imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * 0.2 - 0.5;
                             CGContextDrawImage(context, imageDrawRect, image.CGImage);
+                            NSLog(@"gif:rect:%@,imageName:%@",NSStringFromCGRect(imageDrawRect),imageName);
                         } else {
 #warning gif
-                            imageDrawRect.size = CGSizeMake(self.font.pointSize * 1.2, self.font.pointSize * 1.2);
+                            imageDrawRect.size = CGSizeMake(self.font.pointSize + 4, self.font.pointSize + 4);
                             imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
-                            imageDrawRect.origin.y = self.frame.size.height - lineOrigin.y + self.font.pointSize * .2 - self.font.pointSize * 1.2;
+                            imageDrawRect.origin.y = self.frame.size.height - lineOrigin.y + self.font.pointSize * 0.2 - 0.5 - self.font.pointSize * 1.20;
+                            NSLog(@"png:rect:%@,imageName:%@",NSStringFromCGRect(imageDrawRect),imageName);
                             NSURL *fileUrl = [[NSBundle mainBundle] URLForResource:imageName withExtension:@""];//加载GIF图片
                             CGImageSourceRef gifSource = CGImageSourceCreateWithURL((CFURLRef)fileUrl, NULL);//将GIF图片转换成对应的图片源
                             size_t frameCout=CGImageSourceGetCount(gifSource);//获取其中图片源个数，即由多少帧图片组成
@@ -301,7 +302,9 @@
     }
     
     //通过正则表达式查找出匹配的字符串
-    NSArray *matchArray = [self.text componentsMatchedByRegex:regex];
+    NSArray *matchArray = [SMLabel matchLinkWithStr:self.text withMatchStr:regex];
+    NSLog(@"2----个数：%@",matchArray);
+//    NSArray *matchArray = [self.text componentsMatchedByRegex:regex];
     //<image url = 'wxhl.png'>
     return matchArray;
 }
@@ -321,26 +324,29 @@
     NSMutableArray *ranges = [NSMutableArray array];
     for (NSString *imageUrl in [self imagesOfRegexStrArray]) {
         NSArray *imageUrls = [imageUrl componentsSeparatedByString:@"'"];
-        NSString *imgName = imageUrls[1];
-        CTRunDelegateRef runDelegate = CTRunDelegateCreate(&imageCallbacks, (__bridge void *)(imgName));
-        NSMutableAttributedString *imageAttributedString = [[NSMutableAttributedString alloc] initWithString:@"   "];//空格用于给图片留位置
-        [imageAttributedString addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)runDelegate range:NSMakeRange(1, 1)];
-        CFRelease(runDelegate);
-        //设置空格的属性
-        [imageAttributedString addAttribute:SMLabel_IMAGE_NAME value:imgName range:NSMakeRange(1, 1)];
+        if (imageUrls.count >= 2) {
+            NSString *imgName = imageUrls[1];
+            CTRunDelegateRef runDelegate = CTRunDelegateCreate(&imageCallbacks, (__bridge void *)(@(self.font.pointSize)));
+            NSMutableAttributedString *imageAttributedString = [[NSMutableAttributedString alloc] initWithString:@"  "];//空格用于给图片留位置
+            [imageAttributedString addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)runDelegate range:NSMakeRange(0, 1)];
+            CFRelease(runDelegate);
+            //设置空格的属性
+            [imageAttributedString addAttribute:SMLabel_IMAGE_NAME value:imgName range:NSMakeRange(0, 1)];
+            
+            //获取上一次图片检索的位置
+            NSValue *lastValue = [ranges lastObject];
+            long location = [lastValue rangeValue].location + ([lastValue rangeValue].length == 0 ? 0 : 1);
+            //获取当前字符串在文本中的位置
+            NSRange range = [[self.attrString string] rangeOfString:imageUrl  options:NSCaseInsensitiveSearch range:NSMakeRange(location, self.attrString.length - location)];
+            //NSLog(@"lenght:%d",self.attrString.length);
+            //把图片的字符串替换为（空格的属性字符串）
+            [self.attrString replaceCharactersInRange:range withAttributedString:imageAttributedString];
+            //NSLog(@"lenght:%d",self.attrString.length);
+            NSValue *value = [NSValue valueWithRange:range];
+            //添加到数组中
+            [ranges addObject:value];
+        }
         
-        //获取上一次图片检索的位置
-        NSValue *lastValue = [ranges lastObject];
-        long location = [lastValue rangeValue].location + ([lastValue rangeValue].length == 0 ? 0 : 1);
-        //获取当前字符串在文本中的位置
-        NSRange range = [[self.attrString string] rangeOfString:imageUrl  options:NSCaseInsensitiveSearch range:NSMakeRange(location, self.attrString.length - location)];
-        //NSLog(@"lenght:%d",self.attrString.length);
-        //把图片的字符串替换为（空格的属性字符串）
-        [self.attrString replaceCharactersInRange:range withAttributedString:imageAttributedString];
-        //NSLog(@"lenght:%d",self.attrString.length);
-        NSValue *value = [NSValue valueWithRange:range];
-        //添加到数组中
-        [ranges addObject:value];
     }
 }
 
@@ -361,7 +367,8 @@ CGFloat RunDelegateGetDescentCallback(void *refCon) {
 CGFloat RunDelegateGetWidthCallback(void *refCon){
     //    NSString *imageName = (__bridge NSString *)refCon;
     //    return [UIImage imageNamed:imageName].size.width;
-    return 23;
+    NSNumber *fontSize = (__bridge NSNumber *)refCon;
+    return [fontSize floatValue] * 1.0;
 }
 #pragma mark - 检索当前链接文本
 //返回所有的链接字符串数组
@@ -371,7 +378,9 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     NSString *regex = [self.delegate contentsOfRegexStringWithSMLabel:self];
     
     //通过正则表达式查找出匹配的字符串
-    NSArray *matchArray = [[self.attrString string] componentsMatchedByRegex:regex];
+    NSArray *matchArray = [SMLabel matchLinkWithStr:[self.attrString string] withMatchStr:regex];
+    NSLog(@"3----个数：%@",matchArray);
+//    NSArray *matchArray = [[self.attrString string] componentsMatchedByRegex:regex];
     //@用户 ---> <a href='user://用户'>@用户</a>
     //http:// ---> <a href='http://wwww.iphonetrain.com'>http://wwww.iphonetrain.com</a>
     //#话题# -----> <a href='topic://话题'>#话题#</a>
@@ -569,7 +578,6 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
                                     delegate:(id<SMLabelDelegate>)delegate
                                         font:(UIFont*)font
 {
-    int total_height = 0;
     
     //生成属性字符串对象
     NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc]initWithString:text];
@@ -590,32 +598,34 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     }
     
     //通过正则表达式查找出匹配的字符串
-    NSArray *matchArray = [text componentsMatchedByRegex:regex];
-    
+    NSArray *matchArray = [SMLabel matchLinkWithStr:text withMatchStr:regex];
+    NSLog(@"1----个数：%@",matchArray);
+//    NSArray *matchArray = [text componentsMatchedByRegex:regex];
     for (NSString *imageUrl in matchArray) {
         NSArray *imageUrls = [imageUrl componentsSeparatedByString:@"'"];
-        NSString *imgName = imageUrls[1];
-        CTRunDelegateRef runDelegate = CTRunDelegateCreate(&imageCallbacks, (__bridge void *)(imgName));
-        NSMutableAttributedString *imageAttributedString = [[NSMutableAttributedString alloc] initWithString:@"   "];//空格用于给图片留位置
-        [imageAttributedString addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)runDelegate range:NSMakeRange(1, 1)];
-        CFRelease(runDelegate);
-        //设置空格的属性
-        [imageAttributedString addAttribute:SMLabel_IMAGE_NAME value:imgName range:NSMakeRange(1, 1)];
-        
-        //获取上一次图片检索的位置
-        NSValue *lastValue = [ranges lastObject];
-        long location = [lastValue rangeValue].location + ([lastValue rangeValue].length == 0 ? 0 : 1);
-        //获取当前字符串在文本中的位置
-        NSRange range = [[attrString string] rangeOfString:imageUrl  options:NSCaseInsensitiveSearch range:NSMakeRange(location, attrString.length - location)];
-        //NSLog(@"lenght:%d",self.attrString.length);
-        //把图片的字符串替换为（空格的属性字符串）
-        [attrString replaceCharactersInRange:range withAttributedString:imageAttributedString];
-        //NSLog(@"lenght:%d",self.attrString.length);
-        NSValue *value = [NSValue valueWithRange:range];
-        //添加到数组中
-        [ranges addObject:value];
+        if (imageUrls.count >= 2) {
+            NSString *imgName = imageUrls[1];
+            CTRunDelegateRef runDelegate = CTRunDelegateCreate(&imageCallbacks, (__bridge void *)(@(font.pointSize)));
+            NSMutableAttributedString *imageAttributedString = [[NSMutableAttributedString alloc] initWithString:@"  "];//空格用于给图片留位置
+            [imageAttributedString addAttribute:(NSString *)kCTRunDelegateAttributeName value:(__bridge id)runDelegate range:NSMakeRange(0, 1)];
+            CFRelease(runDelegate);
+            //设置空格的属性
+            [imageAttributedString addAttribute:SMLabel_IMAGE_NAME value:imgName range:NSMakeRange(0, 1)];
+            
+            //获取上一次图片检索的位置
+            NSValue *lastValue = [ranges lastObject];
+            long location = [lastValue rangeValue].location + ([lastValue rangeValue].length == 0 ? 0 : 1);
+            //获取当前字符串在文本中的位置
+            NSRange range = [[attrString string] rangeOfString:imageUrl  options:NSCaseInsensitiveSearch range:NSMakeRange(location, attrString.length - location)];
+            //NSLog(@"lenght:%d",self.attrString.length);
+            //把图片的字符串替换为（空格的属性字符串）
+            [attrString replaceCharactersInRange:range withAttributedString:imageAttributedString];
+            //NSLog(@"lenght:%d",self.attrString.length);
+            NSValue *value = [NSValue valueWithRange:range];
+            //添加到数组中
+            [ranges addObject:value];
+        }
     }
-    
     //------------------------设置字体属性--------------------------
     //    CTFontRef font = CTFontCreateWithName(CFSTR("Georgia"), 15, NULL);
     //设置当前字体
@@ -709,6 +719,30 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
      return total_height;
      */
     
+}
+
+#pragma mark - 正则表达式
++ (NSMutableArray *)matchLinkWithStr:(NSString *)str withMatchStr:(NSString *)matchRegex;
+{
+    NSError *error = NULL;
+    NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:matchRegex
+                                                                         options:NSRegularExpressionCaseInsensitive
+                                                                           error:&error];
+    NSArray *match = [reg matchesInString:str
+                                  options:NSMatchingReportCompletion
+                                    range:NSMakeRange(0, [str length])];
+    
+    NSMutableArray *mulArr = [NSMutableArray array];
+    // 取得所有的NSRange对象
+    if(match.count != 0)
+    {
+        for (NSTextCheckingResult *matc in match)
+        {
+            NSRange range = [matc range];
+            [mulArr addObject:[str substringWithRange:range]];
+        }
+    }
+    return mulArr;
 }
 
 
