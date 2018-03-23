@@ -17,7 +17,7 @@
 #import <CoreText/CoreText.h>
 
 // 设置行间距比例，行间距 ＝ 行间距比例＊字体大小 default ＝ 0.4
-#define kSMLINEHEIGHT_SCALE (.4)
+#define kSMLINEHEIGHT_SCALE (0.4)
 
 // 计算文本的最大行高，默认为：1000,如果视图内容可能超过这个高度可自行调节
 #define kSMLabel_MAXHEIGHT (1000)

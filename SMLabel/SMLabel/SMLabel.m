@@ -10,6 +10,7 @@
 #import <CoreText/CoreText.h>
 #import <ImageIO/ImageIO.h>
 #define SMLabel_IMAGE_NAME @"imageName"
+
 @interface SMLabel ()
 
 @property(nonatomic,assign)NSRange movieStringRange;//当前选中的字符索引
@@ -132,7 +133,7 @@
     //行距
     _linespace = self.font.pointSize * kSMLINEHEIGHT_SCALE;
     CTParagraphStyleSetting lineSpaceSetting;
-    lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacing;
+    lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacingAdjustment;
     lineSpaceSetting.value = &_linespace;
     lineSpaceSetting.valueSize = sizeof(_linespace);
     
@@ -213,7 +214,7 @@
             CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
             //NSLog(@"ascent = %f,descent = %f,leading = %f",lineAscent,lineDescent,lineLeading);
             CFArrayRef runs = CTLineGetGlyphRuns(line);
-            NSLog(@"run count = %ld",CFArrayGetCount(runs));
+            //NSLog(@"run count = %ld",CFArrayGetCount(runs));
             for (int j = 0; j < CFArrayGetCount(runs); j++) {
                 CGFloat runAscent;
                 CGFloat runDescent;
@@ -225,26 +226,26 @@
                 //NSLog(@"width = %f",runRect.size.width);
                 
                 runRect=CGRectMake(lineOrigin.x + CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL), lineOrigin.y - runDescent, runRect.size.width, runAscent + runDescent);
-                NSLog(@"%@",attributes);
+                //NSLog(@"%@",attributes);
                 NSString *imageName = [attributes objectForKey:SMLabel_IMAGE_NAME];
                 //图片渲染逻辑
                 if (imageName) {
                     UIImage *image = [UIImage imageNamed:imageName];
                     if (image) {
                         CGRect imageDrawRect;
-#warning 设置图片的大小
+#pragma mark 设置图片的大小
                         if (![imageName hasSuffix:@"gif"]) {
                             imageDrawRect.size = CGSizeMake(self.font.pointSize + 4 , self.font.pointSize + 4);
                             imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
                             imageDrawRect.origin.y = lineOrigin.y - self.font.pointSize * 0.2 - 0.5;
                             CGContextDrawImage(context, imageDrawRect, image.CGImage);
-                            NSLog(@"gif:rect:%@,imageName:%@",NSStringFromCGRect(imageDrawRect),imageName);
+                            //NSLog(@"gif:rect:%@,imageName:%@",NSStringFromCGRect(imageDrawRect),imageName);
                         } else {
-#warning gif
+#pragma mark gif
                             imageDrawRect.size = CGSizeMake(self.font.pointSize + 4, self.font.pointSize + 4);
                             imageDrawRect.origin.x = runRect.origin.x + lineOrigin.x;
                             imageDrawRect.origin.y = self.frame.size.height - lineOrigin.y + self.font.pointSize * 0.2 - 0.5 - self.font.pointSize * 1.20;
-                            NSLog(@"png:rect:%@,imageName:%@",NSStringFromCGRect(imageDrawRect),imageName);
+                            //NSLog(@"png:rect:%@,imageName:%@",NSStringFromCGRect(imageDrawRect),imageName);
                             NSURL *fileUrl = [[NSBundle mainBundle] URLForResource:imageName withExtension:@""];//加载GIF图片
                             CGImageSourceRef gifSource = CGImageSourceCreateWithURL((CFURLRef)fileUrl, NULL);//将GIF图片转换成对应的图片源
                             size_t frameCout=CGImageSourceGetCount(gifSource);//获取其中图片源个数，即由多少帧图片组成
@@ -278,13 +279,13 @@
             CGContextSetTextPosition(context, lineOrigin.x, lineOrigin.y);
             
             if (i == self.row.count - 1) {
-                NSLog(@"最后一行");
+                //NSLog(@"最后一行");
                 // 最后一行，加上省略号
 //                static NSString* const kEllipsesCharacter = @"\u2026 全文";
                 static NSString* const kEllipsesCharacter = @"\u2026";
                 CFRange lastLineRange = CTLineGetStringRange(line);
                 // 一个emoji表情占用两个长度单位
-                NSLog(@"range.location = %ld,range.length = %ld,总长度 = %ld",lastLineRange.location,lastLineRange.length,_attrString.length);
+                //NSLog(@"range.location = %ld,range.length = %ld,总长度 = %ld",lastLineRange.location,lastLineRange.length,_attrString.length);
                 if (lastLineRange.location + lastLineRange.length < (CFIndex)_attrString.length){
                     // 这一行放不下所有的字符（下一行还有字符），则把此行后面的回车、空格符去掉后，再把最后一个字符替换成省略号
                     CTLineTruncationType truncationType = kCTLineTruncationEnd;
@@ -300,7 +301,7 @@
                     CTLineRef truncationToken = CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)tokenString);
                     
                     // 把这一行的属性字符串复制一份，如果要把省略号放到中间或其他位置，只需指定复制的长度即可
-                    NSUInteger copyLength = lastLineRange.length;
+                    long copyLength = lastLineRange.length;
                     
                     NSMutableAttributedString *truncationString = [[_attrString attributedSubstringFromRange:NSMakeRange(lastLineRange.location, copyLength)] mutableCopy];
                     
@@ -372,7 +373,7 @@
     
     //通过正则表达式查找出匹配的字符串
     NSArray *matchArray = [SMLabel matchLinkWithStr:self.text withMatchStr:regex];
-    NSLog(@"2----个数：%@",matchArray);
+    //NSLog(@"2----个数：%@",matchArray);
 //    NSArray *matchArray = [self.text componentsMatchedByRegex:regex];
     //<image url = 'wxhl.png'>
     return matchArray;
@@ -448,7 +449,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     //通过正则表达式查找出匹配的字符串
     NSArray *matchArray = [SMLabel matchLinkWithStr:[self.attrString string] withMatchStr:regex];
-    NSLog(@"3----个数：%@",matchArray);
+//    NSLog(@"3----个数：%@",matchArray);
 //    NSArray *matchArray = [[self.attrString string] componentsMatchedByRegex:regex];
     //@用户 ---> <a href='user://用户'>@用户</a>
     //http:// ---> <a href='http://wwww.iphonetrain.com'>http://wwww.iphonetrain.com</a>
@@ -491,7 +492,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
         // 点击的是非超链接文本
         //        [super touchesEnded:touches withEvent:event];
         
-        NSLog(@"点击的不是超链接文本");
+        //NSLog(@"点击的不是超链接文本");
         
         if ([self.delegate respondsToSelector:@selector(toucheEndNoLinkSMLabel:)]) {
             [self.delegate toucheEndNoLinkSMLabel:self];
@@ -668,7 +669,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     //通过正则表达式查找出匹配的字符串
     NSArray *matchArray = [SMLabel matchLinkWithStr:text withMatchStr:regex];
-    NSLog(@"1----个数：%@",matchArray);
+    //NSLog(@"1----个数：%@",matchArray);
 //    NSArray *matchArray = [text componentsMatchedByRegex:regex];
     for (NSString *imageUrl in matchArray) {
         NSArray *imageUrls = [imageUrl componentsSeparatedByString:@"'"];
@@ -712,7 +713,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     //行距
     float linespace = font.pointSize * kSMLINEHEIGHT_SCALE;
     CTParagraphStyleSetting lineSpaceSetting;
-    lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacing;
+    lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacingAdjustment;
     lineSpaceSetting.value = &linespace;
     lineSpaceSetting.valueSize = sizeof(linespace);
     

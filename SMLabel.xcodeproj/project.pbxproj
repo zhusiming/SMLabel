@@ -18,7 +18,6 @@
 		54BDACF31D26483800F665B2 /* SMLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 54BDACF11D26483800F665B2 /* SMLabel.m */; };
 		54BDACF61D264C0900F665B2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 54BDACF51D264C0900F665B2 /* ViewController.m */; };
 		54BDACF81D264C8A00F665B2 /* 1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 54BDACF71D264C8A00F665B2 /* 1@2x.png */; };
-		54BDACFA1D264D5100F665B2 /* libicucore.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 54BDACF91D264D5100F665B2 /* libicucore.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,7 +37,6 @@
 		54BDACF41D264C0900F665B2 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		54BDACF51D264C0900F665B2 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		54BDACF71D264C8A00F665B2 /* 1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "1@2x.png"; sourceTree = "<group>"; };
-		54BDACF91D264D5100F665B2 /* libicucore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.tbd; path = usr/lib/libicucore.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,7 +44,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				54BDACFA1D264D5100F665B2 /* libicucore.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,7 +53,6 @@
 		54BDACC01D26457900F665B2 = {
 			isa = PBXGroup;
 			children = (
-				54BDACF91D264D5100F665B2 /* libicucore.tbd */,
 				54BDACCB1D26457900F665B2 /* SMLabel */,
 				54BDACCA1D26457900F665B2 /* Products */,
 			);
@@ -77,10 +73,7 @@
 				54BDACD01D26457900F665B2 /* AppDelegate.m */,
 				54BDACF41D264C0900F665B2 /* ViewController.h */,
 				54BDACF51D264C0900F665B2 /* ViewController.m */,
-				54BDACF71D264C8A00F665B2 /* 1@2x.png */,
-				5493B1F41E49D827007C7F8D /* 2.gif */,
-				5499833D1E4AC4FB00E64966 /* emoji_1f603.png */,
-				5499833F1E4AC75D00E64966 /* B8715B823E6BE80BB1516E6AF60C49E3.png */,
+				54E317AF2064BF6100ADA493 /* source */,
 				54BDACED1D26483800F665B2 /* SMLabel */,
 				54BDACD81D26457900F665B2 /* Main.storyboard */,
 				54BDACDB1D26457900F665B2 /* Assets.xcassets */,
@@ -106,6 +99,17 @@
 				54BDACF11D26483800F665B2 /* SMLabel.m */,
 			);
 			path = SMLabel;
+			sourceTree = "<group>";
+		};
+		54E317AF2064BF6100ADA493 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				54BDACF71D264C8A00F665B2 /* 1@2x.png */,
+				5493B1F41E49D827007C7F8D /* 2.gif */,
+				5499833D1E4AC4FB00E64966 /* emoji_1f603.png */,
+				5499833F1E4AC75D00E64966 /* B8715B823E6BE80BB1516E6AF60C49E3.png */,
+			);
+			path = source;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,7 +138,7 @@
 		54BDACC11D26457900F665B2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0910;
 				ORGANIZATIONNAME = "朱思明";
 				TargetAttributes = {
 					54BDACC81D26457900F665B2 = {
@@ -221,13 +225,21 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -249,7 +261,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -265,13 +277,21 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -287,7 +307,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
