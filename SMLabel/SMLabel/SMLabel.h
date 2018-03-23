@@ -65,7 +65,7 @@
 
 
 @interface SMLabel : UILabel
-
+//@property(nonatomic, assign)BOOL isOpen;   //是否显示展开按钮
 @property(nonatomic, assign)id<SMLabelDelegate> delegate;   //代理对象
 @property(nonatomic, assign, readonly)CGFloat linespace;    //行间距      default = 当前字体的大小 ＊ kSMLINEHEIGHT_SCALE
 @property(nonatomic, assign, readonly)CGFloat lineHeight;   //行高        default = 当前字体的大小

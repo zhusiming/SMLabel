@@ -21,6 +21,7 @@
 @property(nonatomic,strong)UIColor *passColor;   //鼠标经过链接文本颜色
 @property(nonatomic,strong)NSArray *regexStrArray;  //正则表达式 数组
 @property(nonatomic,strong)NSMutableArray *emoticonArray;  //正则表达式 数组
+
 @end
 
 @implementation SMLabel
@@ -180,7 +181,6 @@
     
     //使用上面生成的setter和path生成一个CTFrameRef对象，这个对象包含了这两个对象的信息（字体信息、坐标信息）
     CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
-    
     //获取当前(View)上下文以便于之后的绘画，这个是一个离屏。
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSetTextMatrix(context , CGAffineTransformIdentity);
@@ -192,8 +192,8 @@
     //缩放x，y轴方向缩放，－1.0为反向1.0倍,坐标系转换,沿x轴翻转180度
     CGContextScaleCTM(context, 1.0 ,-1.0);
     //可以使用CTFrameDraw方法绘制了。
-    CTFrameDraw(frame,context);
-    
+//    CTFrameDraw(frame,context);
+//    return;
     //获取当前行的集合
     self.row = (NSArray *)CTFrameGetLines(frame);
     if (self.row.count > 0) {
@@ -212,7 +212,6 @@
             CGFloat lineLeading;
             CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
             //NSLog(@"ascent = %f,descent = %f,leading = %f",lineAscent,lineDescent,lineLeading);
-            
             CFArrayRef runs = CTLineGetGlyphRuns(line);
             NSLog(@"run count = %ld",CFArrayGetCount(runs));
             for (int j = 0; j < CFArrayGetCount(runs); j++) {
@@ -273,6 +272,76 @@
                         
                     }
                 }
+            }
+            //CoreText的origin的Y值是在baseLine处，而不是下方的descent。
+            CGPoint lineOrigin = lineOrigins[i];
+            CGContextSetTextPosition(context, lineOrigin.x, lineOrigin.y);
+            
+            if (i == self.row.count - 1) {
+                NSLog(@"最后一行");
+                // 最后一行，加上省略号
+//                static NSString* const kEllipsesCharacter = @"\u2026 全文";
+                static NSString* const kEllipsesCharacter = @"\u2026";
+                CFRange lastLineRange = CTLineGetStringRange(line);
+                // 一个emoji表情占用两个长度单位
+                NSLog(@"range.location = %ld,range.length = %ld,总长度 = %ld",lastLineRange.location,lastLineRange.length,_attrString.length);
+                if (lastLineRange.location + lastLineRange.length < (CFIndex)_attrString.length){
+                    // 这一行放不下所有的字符（下一行还有字符），则把此行后面的回车、空格符去掉后，再把最后一个字符替换成省略号
+                    CTLineTruncationType truncationType = kCTLineTruncationEnd;
+//                    NSUInteger truncationAttributePosition = lastLineRange.location + lastLineRange.length - 1;
+                    
+                    // 拿到最后一个字符的属性字典
+                    // 给省略号字符设置字体大小、颜色等属性
+                    NSMutableAttributedString *tokenString = [[NSMutableAttributedString alloc] initWithString:kEllipsesCharacter];
+                    [tokenString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.textColor range:NSMakeRange(0, 1)];
+//                    [tokenString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.linkColor range:NSMakeRange(2, 2)];
+                    
+                    // 用省略号单独创建一个CTLine，下面在截断重新生成CTLine的时候会用到
+                    CTLineRef truncationToken = CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)tokenString);
+                    
+                    // 把这一行的属性字符串复制一份，如果要把省略号放到中间或其他位置，只需指定复制的长度即可
+                    NSUInteger copyLength = lastLineRange.length;
+                    
+                    NSMutableAttributedString *truncationString = [[_attrString attributedSubstringFromRange:NSMakeRange(lastLineRange.location, copyLength)] mutableCopy];
+                    
+                    if (lastLineRange.length > 0)
+                    {
+                        // Remove any whitespace at the end of the line.
+                        unichar lastCharacter = [[truncationString string] characterAtIndex:copyLength - 1];
+                        
+                        // 如果复制字符串的最后一个字符是换行、空格符，则删掉
+                        if ([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:lastCharacter])
+                        {
+                            [truncationString deleteCharactersInRange:NSMakeRange(copyLength - 1, 1)];
+                        }
+                    }
+                    
+                    // 拼接省略号到复制字符串的最后
+                    [truncationString appendAttributedString:tokenString];
+                    
+                    // 把新的字符串创建成CTLine
+                    CTLineRef truncationLine = CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)truncationString);
+                    
+                    // 创建一个截断的CTLine，该方法不能少，具体作用还有待研究
+                    CTLineRef truncatedLine = CTLineCreateTruncatedLine(truncationLine, self.frame.size.width, truncationType, truncationToken);
+                    
+                    if (!truncatedLine)
+                    {
+                        // If the line is not as wide as the truncationToken, truncatedLine is NULL
+                        truncatedLine = CFRetain(truncationToken);
+                    }
+                    
+                    CFRelease(truncationLine);
+                    CFRelease(truncationToken);
+                    
+                    CTLineDraw(truncatedLine, context);
+                    CFRelease(truncatedLine);
+                } else{
+                    // 这一行刚好是最后一行，且最后一行的字符可以完全绘制出来
+                    CTLineDraw(line, context);
+                }
+            } else {
+                CTLineDraw(line, context);
             }
         }
     }
@@ -427,8 +496,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
         if ([self.delegate respondsToSelector:@selector(toucheEndNoLinkSMLabel:)]) {
             [self.delegate toucheEndNoLinkSMLabel:self];
         }
-    }else
-    {
+    } else {
         //判断当前代理方法是否实现
         if ([self.delegate respondsToSelector:@selector(toucheEndSMLabel:withContext:)]) {
             //获取当前点击字符串
@@ -569,6 +637,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     float height = [SMLabel getAttributedStringHeightWithString:self.text WidthValue:self.frame.size.width delegate:_delegate font:self.font];
     self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, height);
 }
+
 
 #pragma mark - 计算文本高度
 #define kHeightDic @"kHeightDic"
