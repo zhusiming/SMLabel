@@ -75,4 +75,32 @@
 //检索文本中图片的正则表达式的字符串
 //- (NSString *)imagesOfRegexStringWithSMLabel:(SMLabel *)smLabel;
 
+#pragma mark - 1.1.0 添加长按显示UIMenuController功能
+/// 长按显示UIMenuController视图
+- (NSMutableArray<UIMenuItem *> *)menuItemsWithSMLabel:(SMLabel *)smLabel {
+    NSMutableArray *menuItems = [[NSMutableArray alloc] init];
+    
+    UIMenuItem *copyItem = [[UIMenuItem alloc] initWithTitle:@"复制" action:NSSelectorFromString(@"copyText:")];
+    [menuItems addObject:copyItem];
+    UIMenuItem *testItem = [[UIMenuItem alloc] initWithTitle:@"测试" action:NSSelectorFromString(@"test:")];
+    [menuItems addObject:testItem];
+    return menuItems;
+}
+/// 点击UIMenuItem的点击事件
+- (void)menuItemsTouchUpIndexWithSMLabel:(SMLabel *)smLabel menuItemAction:(SEL)action sender:(id)sender {
+    if (action == NSSelectorFromString(@"copyText:")) {
+        NSLog(@"复制%@",sender);
+    } else if (action == NSSelectorFromString(@"test:")) {
+        NSLog(@"测试%@",sender);
+    }
+}
+/// 显示menuController的时候的背景色 default = [UIColor lightGrayColor]
+- (UIColor *)menuControllerDidShowColorWithSMLabel:(SMLabel *)smLabel {
+    return [UIColor redColor];
+}
+/// 隐藏menuController的时候的背景色 default = [UIColor clearColor]
+- (UIColor *)menuControllerDidCloseColorWithSMLabel:(SMLabel *)smLabel {
+    return [UIColor clearColor];
+}
+
 @end

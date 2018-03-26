@@ -9,7 +9,20 @@
 #import "SMLabel.h"
 #import <CoreText/CoreText.h>
 #import <ImageIO/ImageIO.h>
+#import <objc/runtime.h>
+
 #define SMLabel_IMAGE_NAME @"imageName"
+
+void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
+    
+    if ([self isKindOfClass:[SMLabel class]]) {
+        SMLabel *thisSelf = self;
+        if ([thisSelf.delegate respondsToSelector:@selector(menuItemsTouchUpIndexWithSMLabel:menuItemAction:sender:)]) {
+            [thisSelf.delegate menuItemsTouchUpIndexWithSMLabel:self menuItemAction:_cmd sender:param];
+        }
+    }
+//    NSLog(@"调用eat %@ %@ %@",self,NSStringFromSelector(_cmd),param);
+}
 
 @interface SMLabel ()
 
@@ -31,9 +44,8 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
-        // 开启当前点击的手势
-        self.userInteractionEnabled = YES;
+        /// 添加长按手势
+        [self addLongPress];
     }
     return self;
 }
@@ -41,18 +53,87 @@
 - (void)awakeFromNib
 {
     [super awakeFromNib];
-    // 开启当前点击的手势
-    self.userInteractionEnabled = YES;
+    /// 添加长按手势
+    [self addLongPress];
 }
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        // 开启当前点击的手势
-        self.userInteractionEnabled = YES;
+        /// 添加长按手势
+        [self addLongPress];
     }
     return self;
+}
+
+/// 添加长按手势
+- (void)addLongPress {
+    // 开启当前点击的手势
+    self.userInteractionEnabled = YES;
+    // 创建长按手势
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressAction:)];
+    longPress.minimumPressDuration = 0.5;
+    [self addGestureRecognizer:longPress];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerWillHide) name:UIMenuControllerWillHideMenuNotification object:nil];
+}
+
+- (void)longPressAction:(UILongPressGestureRecognizer *)longPress {
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        if ([self.delegate respondsToSelector:@selector(menuItemsWithSMLabel:)]) {
+            NSMutableArray<UIMenuItem *> *menuItems = [self.delegate menuItemsWithSMLabel:self];
+            [self becomeFirstResponder];
+            // 控制好menu的显示与隐藏
+            UIMenuController *menuVC = [UIMenuController sharedMenuController];
+            if (menuVC.isMenuVisible) {
+                [menuVC setMenuVisible:NO animated:YES];
+            }
+            menuVC.menuItems = menuItems;
+            /// 显示menuController的时候的背景色 default = [UIColor lightGrayColor]
+            if ([self.delegate respondsToSelector:@selector(menuControllerDidShowColorWithSMLabel:)]) {
+                self.backgroundColor = [self.delegate menuControllerDidShowColorWithSMLabel:self];
+            } else {
+                self.backgroundColor = [UIColor lightGrayColor];
+            }
+            [menuVC setTargetRect:self.frame inView:self.superview];
+            [menuVC setMenuVisible:YES animated:YES];
+        }
+    }
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    // 明确该控件可以成为第一响应者
+    return YES;
+}
+
+// 该控件可以执行哪些动作
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
+{
+    // 1.获取所有数据列表
+    NSMutableArray<UIMenuItem *> *menuItems = [self.delegate menuItemsWithSMLabel:self];
+    // 2.遍历列表中的内容进行对比
+    for (UIMenuItem *item in menuItems) {
+        if (item.action == action) {
+            // 3.判断当前方法是否存在不存在进行方法创建
+            if (![self respondsToSelector:action]) {
+                return class_addMethod([self class], action, (IMP)smLabelMenuControllerAction, "v@:@");
+            }
+            return YES;
+        }
+    }
+    return NO;
+}
+
+// 菜单视图将要消失
+- (void)menuControllerWillHide
+{
+    /// 隐藏menuController的时候的背景色 default = [UIColor clearColor]
+    if ([self.delegate respondsToSelector:@selector(menuControllerDidCloseColorWithSMLabel:)]) {
+        self.backgroundColor = [self.delegate menuControllerDidCloseColorWithSMLabel:self];
+    } else {
+        self.backgroundColor = [UIColor clearColor];
+    }
 }
 
 #pragma mark - 绘制视图

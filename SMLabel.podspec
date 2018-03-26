@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "SMLabel"
-  s.version      = "1.0.2"
+  s.version      = "1.1.0"
   s.summary      = "through this class can be achieved by mixed text, text to add a link event, connect the text color settings."
 
   s.homepage     = "https://github.com/zhusiming/SMLabel"
