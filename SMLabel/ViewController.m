@@ -21,17 +21,19 @@
     self.view.backgroundColor = [UIColor orangeColor];
     // 创建一个富文本视图
     SMLabel *label = [[SMLabel alloc] initWithFrame:CGRectMake(0, 100, 320, 200)];
+    label.lineHeight = 20;
+    label.linespace = 10;
     // 设置代理对象
     label.delegate = self;
     label.font = [UIFont systemFontOfSize:14];
     label.text = @"测试数据，这是一个富文本一个富文本本本一个富文本一个富文本@用户 据文#话题#、1111111#话题# ，片<image url = '1.png'>图片在现实d现实d😂d现实d<image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'>d现实d现实d现实1@用户 据文混排的框架#话题#、#话题#、#话题# ，https://github.com/zhusiming 下面要现实一张图片<image url = '1.png'>图片在现实d现实d现实d现实d现实d现实d现实d现实dd现实d现实1123412－121😂😄<image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'><image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'><image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'><image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'><image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'><image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'><image url = 'B8715B823E6BE80BB1516E6AF60C49E3.png'>😄😂1";
     label.backgroundColor = [UIColor grayColor];
     // 获取文本的高度
-//    float height = [SMLabel getAttributedStringHeightWithString:label.text WidthValue:320 delegate:self font:label.font];
+//    float height = [SMLabel sm_getStringHeightWithString:label.text width:320 linespace:10 lineHeight:20 font:label.font delegate:self];
     // 设置视图的大小
     label.frame = CGRectMake(0, 100, 320, 80);
     // 视图大小自适应内容大小
-//    [label sizeToFit];
+//    [label sm_sizeToFit];
 
     [self.view addSubview:label];
 }
@@ -76,6 +78,7 @@
 //- (NSString *)imagesOfRegexStringWithSMLabel:(SMLabel *)smLabel;
 
 #pragma mark - 1.1.0 添加长按显示UIMenuController功能
+/*
 /// 长按显示UIMenuController视图
 - (NSMutableArray<UIMenuItem *> *)menuItemsWithSMLabel:(SMLabel *)smLabel {
     NSMutableArray *menuItems = [[NSMutableArray alloc] init];
@@ -102,5 +105,6 @@
 - (UIColor *)menuControllerDidCloseColorWithSMLabel:(SMLabel *)smLabel {
     return [UIColor clearColor];
 }
+ */
 
 @end

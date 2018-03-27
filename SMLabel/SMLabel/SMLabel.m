@@ -46,8 +46,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 {
     self = [super initWithFrame:frame];
     if (self) {
-        /// 添加长按手势
-        [self addLongPress];
+        /// 初始化
+        [self _customInit];
     }
     return self;
 }
@@ -55,22 +55,22 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 - (void)awakeFromNib
 {
     [super awakeFromNib];
-    /// 添加长按手势
-    [self addLongPress];
+    /// 初始化
+    [self _customInit];
 }
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        /// 添加长按手势
-        [self addLongPress];
+        /// 初始化
+        [self _customInit];
     }
     return self;
 }
 
-/// 添加长按手势
-- (void)addLongPress {
+/// 初始化
+- (void)_customInit {
     // 开启当前点击的手势
     self.userInteractionEnabled = YES;
     // 创建长按手势
@@ -78,6 +78,7 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     longPress.minimumPressDuration = 0.5;
     [self addGestureRecognizer:longPress];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(menuControllerWillHide) name:UIMenuControllerWillHideMenuNotification object:nil];
+    // 初始化属性
 }
 
 - (void)longPressAction:(UILongPressGestureRecognizer *)longPress {
@@ -214,14 +215,15 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     
     
     //行距
-    _linespace = self.font.pointSize * kSMLINEHEIGHT_SCALE;
     CTParagraphStyleSetting lineSpaceSetting;
     lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacingAdjustment;
     lineSpaceSetting.value = &_linespace;
     lineSpaceSetting.valueSize = sizeof(_linespace);
     
     //设置行高
-    _lineHeight = self.font.pointSize;
+    if (_lineHeight < self.font.pointSize) {
+        _lineHeight = self.font.pointSize;
+    }
     CTParagraphStyleSetting MinLineHeight;
     MinLineHeight.spec = kCTParagraphStyleSpecifierMinimumLineHeight;
     MinLineHeight.value = &_lineHeight;
@@ -636,7 +638,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 - (NSRange)touchInLabelText:(CGPoint)point
 {
     //获取当前的行高
-    float lineHeight = self.font.pointSize + self.linespace;
+    float lineHeight = self.lineHeight + self.linespace;
     
     int indexLine = point.y / lineHeight;
     //NSLog(@"indexLine:%d",indexLine);
@@ -715,10 +717,15 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 }
 
 // 自适应内容的高度
-- (void)sizeToFit
+- (void)sm_sizeToFit
 {
     // 获取当前内容文本的高度
-    float height = [SMLabel getAttributedStringHeightWithString:self.text WidthValue:self.frame.size.width delegate:_delegate font:self.font];
+    CGFloat height = [SMLabel sm_getStringHeightWithString:self.text
+                                                     width:self.frame.size.width
+                                                 linespace:self.linespace
+                                                lineHeight:self.lineHeight
+                                                      font:self.font
+                                                  delegate:self.delegate];
     self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, height);
 }
 
@@ -726,10 +733,13 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 #pragma mark - 计算文本高度
 #define kHeightDic @"kHeightDic"
 
-+ (float)getAttributedStringHeightWithString:(NSString * _Nonnull)text
-                                  WidthValue:(float)width
-                                    delegate:(id<SMLabelDelegate> _Nullable)delegate
-                                        font:(UIFont * _Nonnull)font
+/// 计算文本内容的高度
++ (CGFloat)sm_getStringHeightWithString:(NSString * _Nonnull)text
+                                  width:(CGFloat) width
+                              linespace:(CGFloat) linespace
+                             lineHeight:(CGFloat) lineHeight
+                                   font:(UIFont * _Nonnull)font
+                               delegate:(id<SMLabelDelegate> _Nullable)delegate
 {
     
     //生成属性字符串对象
@@ -794,20 +804,22 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     
     //行距
-    float linespace = font.pointSize * kSMLINEHEIGHT_SCALE;
     CTParagraphStyleSetting lineSpaceSetting;
     lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacingAdjustment;
     lineSpaceSetting.value = &linespace;
     lineSpaceSetting.valueSize = sizeof(linespace);
     
     //设置行高
-    float minximumLineHeight = font.pointSize;
+    if (lineHeight < font.pointSize) {
+        lineHeight = font.pointSize;
+    }
+    float minximumLineHeight = lineHeight;
     CTParagraphStyleSetting MinLineHeight;
     MinLineHeight.spec = kCTParagraphStyleSpecifierMinimumLineHeight;
     MinLineHeight.value = &minximumLineHeight;
     MinLineHeight.valueSize = sizeof(float);
     
-    float maximumLineHeight = font.pointSize;
+    float maximumLineHeight = lineHeight;
     CTParagraphStyleSetting MaxLineHeight;
     MaxLineHeight.spec = kCTParagraphStyleSpecifierMaximumLineHeight;
     MaxLineHeight.value = &maximumLineHeight;
@@ -849,7 +861,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     CFRelease(framesetter);
     
     NSArray *linesArray = (NSArray *) CTFrameGetLines(textFrame);
-    return linesArray.count * font.pointSize + (linesArray.count - 1) * (font.pointSize * kSMLINEHEIGHT_SCALE);
+    return linesArray.count * lineHeight + (linesArray.count - 1) * (linespace);
     
     /*
      CGPoint origins[[linesArray count]];
