@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SMLabel/SMLabel/SMLabel.m"
-            timestampString = "543814866.736057"
+            timestampString = "543836715.5790319"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "408"
-            endingLineNumber = "408"
+            startingLineNumber = "410"
+            endingLineNumber = "410"
             landmarkName = "-drawRect:"
             landmarkType = "7">
          </BreakpointContent>

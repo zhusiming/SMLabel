@@ -36,6 +36,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 @property(nonatomic,strong)NSArray *regexStrArray;  //正则表达式 数组
 @property(nonatomic,strong)NSMutableArray *emoticonArray;  //正则表达式 数组
 
+@property(nonatomic,strong)NSMutableArray<UIMenuItem *> *menuItems; // 长按选项菜单
+
 @end
 
 @implementation SMLabel
@@ -81,14 +83,14 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 - (void)longPressAction:(UILongPressGestureRecognizer *)longPress {
     if (longPress.state == UIGestureRecognizerStateBegan) {
         if ([self.delegate respondsToSelector:@selector(menuItemsWithSMLabel:)]) {
-            NSMutableArray<UIMenuItem *> *menuItems = [self.delegate menuItemsWithSMLabel:self];
+            self.menuItems = [self.delegate menuItemsWithSMLabel:self];
             [self becomeFirstResponder];
             // 控制好menu的显示与隐藏
             UIMenuController *menuVC = [UIMenuController sharedMenuController];
             if (menuVC.isMenuVisible) {
                 [menuVC setMenuVisible:NO animated:YES];
             }
-            menuVC.menuItems = menuItems;
+            menuVC.menuItems = self.menuItems;
             /// 显示menuController的时候的背景色 default = [UIColor lightGrayColor]
             if ([self.delegate respondsToSelector:@selector(menuControllerDidShowColorWithSMLabel:)]) {
                 self.backgroundColor = [self.delegate menuControllerDidShowColorWithSMLabel:self];
@@ -97,6 +99,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
             }
             [menuVC setTargetRect:self.frame inView:self.superview];
             [menuVC setMenuVisible:YES animated:YES];
+        } else {
+            self.menuItems = nil;
         }
     }
 }
@@ -110,12 +114,10 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 // 该控件可以执行哪些动作
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender
 {
-    // 1.获取所有数据列表
-    NSMutableArray<UIMenuItem *> *menuItems = [self.delegate menuItemsWithSMLabel:self];
-    // 2.遍历列表中的内容进行对比
-    for (UIMenuItem *item in menuItems) {
+    // 1.遍历列表中的内容进行对比
+    for (UIMenuItem *item in self.menuItems) {
         if (item.action == action) {
-            // 3.判断当前方法是否存在不存在进行方法创建
+            // 2.判断当前方法是否存在不存在进行方法创建
             if (![self respondsToSelector:action]) {
                 return class_addMethod([self class], action, (IMP)smLabelMenuControllerAction, "v@:@");
             }
