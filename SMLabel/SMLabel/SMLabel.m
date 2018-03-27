@@ -724,10 +724,10 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 #pragma mark - 计算文本高度
 #define kHeightDic @"kHeightDic"
 
-+ (float)getAttributedStringHeightWithString:(NSString *)text
++ (float)getAttributedStringHeightWithString:(NSString * _Nonnull)text
                                   WidthValue:(float)width
-                                    delegate:(id<SMLabelDelegate>)delegate
-                                        font:(UIFont*)font
+                                    delegate:(id<SMLabelDelegate> _Nullable)delegate
+                                        font:(UIFont * _Nonnull)font
 {
     
     //生成属性字符串对象

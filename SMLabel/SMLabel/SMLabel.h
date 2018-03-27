@@ -28,12 +28,12 @@
 @optional
 
 /// 手指离开当前非超链接文本响应的协议方法
-- (void)toucheEndNoLinkSMLabel:(SMLabel *)smLabel;
+- (void)toucheEndNoLinkSMLabel:(SMLabel * _Nonnull)smLabel;
 
 /// 手指离开当前超链接文本响应的协议方法
-- (void)toucheEndSMLabel:(SMLabel *)smLabel withContext:(NSString *)context;
+- (void)toucheEndSMLabel:(SMLabel * _Nonnull)smLabel withContext:(NSString * _Nonnull)context;
 /// 手指接触当前超链接文本响应的协议方法
-- (void)toucheBenginSMLabel:(SMLabel *)smLabel withContext:(NSString *)context;
+- (void)toucheBenginSMLabel:(SMLabel * _Nonnull)smLabel withContext:(NSString * _Nonnull)context;
 
 /*
     - (NSString *)contentsOfRegexStringWithSMLabel:(SMLabel *)SMLabel
@@ -47,11 +47,11 @@
     }
  */
 /// 检索文本的正则表达式的字符串
-- (NSString *)contentsOfRegexStringWithSMLabel:(SMLabel *)smLabel;
+- (NSString * _Nonnull)contentsOfRegexStringWithSMLabel:(SMLabel * _Nonnull)smLabel;
 /// 设置当前链接文本的颜色
-- (UIColor *)linkColorWithSMLabel:(SMLabel *)smLabel;
+- (UIColor * _Nonnull)linkColorWithSMLabel:(SMLabel * _Nonnull)smLabel;
 /// 设置当前文本手指经过的颜色
-- (UIColor *)passColorWithSMLabel:(SMLabel *)smLabel;
+- (UIColor * _Nonnull)passColorWithSMLabel:(SMLabel * _Nonnull)smLabel;
 
 /*
     注意：
@@ -59,16 +59,16 @@
         可以通过代理方法修改正则表达式，不过本地图片地址的左右（＊＊＊一定要用单引号引起来）
  */
 /// 检索文本中图片的正则表达式的字符串
-- (NSString *)imagesOfRegexStringWithSMLabel:(SMLabel *)smLabel;
+- (NSString * _Nonnull)imagesOfRegexStringWithSMLabel:(SMLabel * _Nullable)smLabel;
 
 /// 长按显示UIMenuController视图
-- (NSMutableArray<UIMenuItem *> *)menuItemsWithSMLabel:(SMLabel *)smLabel;
+- (NSMutableArray<UIMenuItem *> * _Nonnull)menuItemsWithSMLabel:(SMLabel * _Nonnull)smLabel;
 /// 点击UIMenuItem的点击事件
-- (void)menuItemsTouchUpIndexWithSMLabel:(SMLabel *)smLabel menuItemAction:(SEL)action sender:(id)sender;
+- (void)menuItemsTouchUpIndexWithSMLabel:(SMLabel * _Nonnull)smLabel menuItemAction:(SEL _Nonnull)action sender:(id _Nonnull)sender;
 /// 显示menuController的时候的背景色 default = [UIColor lightGrayColor]
-- (UIColor *)menuControllerDidShowColorWithSMLabel:(SMLabel *)smLabel;
+- (UIColor * _Nonnull)menuControllerDidShowColorWithSMLabel:(SMLabel * _Nonnull)smLabel;
 /// 隐藏menuController的时候的背景色 default = [UIColor clearColor]
-- (UIColor *)menuControllerDidCloseColorWithSMLabel:(SMLabel *)smLabel;
+- (UIColor * _Nonnull)menuControllerDidCloseColorWithSMLabel:(SMLabel * _Nonnull)smLabel;
 
 @end
 
@@ -76,7 +76,7 @@
 
 @interface SMLabel : UILabel
 /// @property(nonatomic, assign)BOOL isOpen;   //是否显示展开按钮
-@property(nonatomic, assign)id<SMLabelDelegate> delegate;   //代理对象
+@property(nonatomic, assign)id<SMLabelDelegate> _Nonnull delegate;   //代理对象
 @property(nonatomic, assign, readonly)CGFloat linespace;    //行间距      default = 当前字体的大小 ＊ kSMLINEHEIGHT_SCALE
 @property(nonatomic, assign, readonly)CGFloat lineHeight;   //行高        default = 当前字体的大小
 
@@ -84,8 +84,8 @@
 - (void)sizeToFit;
 
 /// 计算文本内容的高度
-+ (float)getAttributedStringHeightWithString:(NSString *)text
++ (float)getAttributedStringHeightWithString:(NSString * _Nonnull)text
                                   WidthValue:(float)width
-                                    delegate:(id<SMLabelDelegate>)delegate
-                                        font:(UIFont*)font;
+                                    delegate:(id<SMLabelDelegate> _Nullable)delegate
+                                        font:(UIFont * _Nonnull)font;
 @end
