@@ -15,8 +15,6 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
-//  计算文本的最大行高，默认为：1000,如果视图内容可能超过这个高度可自行调节
-#define kSMLabel_MAXHEIGHT (1000)
 
 @class SMLabel;
 @protocol SMLabelDelegate <NSObject>

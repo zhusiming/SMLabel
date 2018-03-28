@@ -14,7 +14,6 @@
 #define SMLabel_IMAGE_NAME @"imageName"
 
 void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
-    
     if ([self isKindOfClass:[SMLabel class]]) {
         SMLabel *thisSelf = self;
         if ([thisSelf.delegate respondsToSelector:@selector(menuItemsTouchUpIndexWithSMLabel:menuItemAction:sender:)]) {
@@ -35,7 +34,6 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 @property(nonatomic,strong)UIColor *passColor;   //鼠标经过链接文本颜色
 @property(nonatomic,strong)NSArray *regexStrArray;  //正则表达式 数组
 @property(nonatomic,strong)NSMutableArray *emoticonArray;  //正则表达式 数组
-
 @property(nonatomic,strong)NSMutableArray<UIMenuItem *> *menuItems; // 长按选项菜单
 
 @end
@@ -106,15 +104,13 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     }
 }
 
-- (BOOL)canBecomeFirstResponder
-{
+- (BOOL)canBecomeFirstResponder {
     // 明确该控件可以成为第一响应者
     return YES;
 }
 
 // 该控件可以执行哪些动作
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
-{
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     // 1.遍历列表中的内容进行对比
     for (UIMenuItem *item in self.menuItems) {
         if (item.action == action) {
@@ -129,8 +125,7 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 }
 
 // 菜单视图将要消失
-- (void)menuControllerWillHide
-{
+- (void)menuControllerWillHide {
     /// 隐藏menuController的时候的背景色 default = [UIColor clearColor]
     if ([self.delegate respondsToSelector:@selector(menuControllerDidCloseColorWithSMLabel:)]) {
         self.backgroundColor = [self.delegate menuControllerDidCloseColorWithSMLabel:self];
@@ -140,8 +135,7 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 }
 
 #pragma mark - 绘制视图
-- (void)drawRect:(CGRect)rect
-{
+- (void)drawRect:(CGRect)rect {
     // 创建表情视图存储数组
     if (self.emoticonArray == nil) {
         self.emoticonArray = [[NSMutableArray alloc] init];
@@ -181,7 +175,6 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     //设置当前文本的颜色
     [_attrString addAttribute:(id)kCTForegroundColorAttributeName value:self.textColor range:NSMakeRange(0, _attrString.length)];
     
-    
     //----------------------设置链接文本的颜色-------------------
     //判断当前链接文本表达式是否实现
     if ([self.delegate respondsToSelector:@selector(contentsOfRegexStringWithSMLabel:)] && [self.delegate contentsOfRegexStringWithSMLabel:self] != nil)
@@ -196,9 +189,7 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
             NSRange range = [value rangeValue];
             //设置字体的颜色
             [_attrString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.linkColor range:range];
-            
         }
-        
         //设置选中经过字体颜色
         [_attrString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.passColor range:self.movieStringRange];
         
@@ -212,7 +203,6 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     alignmentStyle.spec=kCTParagraphStyleSpecifierFirstLineHeadIndent;//指定为对齐属性
     alignmentStyle.valueSize=sizeof(alignment);
     alignmentStyle.value=&alignment;
-    
     
     //行距
     CTParagraphStyleSetting lineSpaceSetting;
@@ -255,10 +245,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     // set attributes to attributed string
     [_attrString addAttributes:attributes range:NSMakeRange(0, _attrString.length)];
     
-    
     //生成CTFramesetterRef对象
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)_attrString);
-    
     
     //然后创建一个CGPath对象，这个Path对象用于表示可绘制区域坐标值、长宽。
     CGRect bouds = CGRectInset(self.bounds, 0.0f, 0.0f);
@@ -411,15 +399,12 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
                     // 创建一个截断的CTLine，该方法不能少，具体作用还有待研究
                     CTLineRef truncatedLine = CTLineCreateTruncatedLine(truncationLine, self.frame.size.width, truncationType, truncationToken);
                     
-                    if (!truncatedLine)
-                    {
+                    if (!truncatedLine) {
                         // If the line is not as wide as the truncationToken, truncatedLine is NULL
                         truncatedLine = CFRetain(truncationToken);
                     }
-                    
                     CFRelease(truncationLine);
                     CFRelease(truncationToken);
-                    
                     CTLineDraw(truncatedLine, context);
                     CFRelease(truncatedLine);
                 } else{
@@ -431,9 +416,6 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
             }
         }
     }
-    
-    
-    
     //－－－－－－－－－－－－－－－获取当前文本的高度－－－－－－－－－－－－－－－－－－
     //获取当前的行高
     //    float lineHeight = self.font.pointSize + self.linespace + 2;
@@ -443,13 +425,10 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     CGPathRelease(path);
     CFRelease(framesetter);
     CFRelease(frame);
-    
-    
 }
 #pragma mark - 检索当前图片
 //获取所有图片的字符串
-- (NSArray *)imagesOfRegexStrArray
-{
+- (NSArray *)imagesOfRegexStrArray {
     //需要添加图片正则表达，默认为@"<image url = '[a-zA-Z0-9_\\.@%&\\S]*'>"
     NSString *regex = @"<image url = '[a-zA-Z0-9_\\.@%&\\S]*'>";
     if ([self.delegate respondsToSelector:@selector(imagesOfRegexStringWithSMLabel:)]) {
@@ -465,8 +444,7 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 }
 
 //替换图片文本
-- (void)replaceImageText
-{
+- (void)replaceImageText {
     //为图片设置CTRunDelegate,delegate决定留给图片的空间大小
     CTRunDelegateCallbacks imageCallbacks;
     imageCallbacks.version = kCTRunDelegateVersion1;
@@ -474,7 +452,6 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     imageCallbacks.getAscent = RunDelegateGetAscentCallback;
     imageCallbacks.getDescent = RunDelegateGetDescentCallback;
     imageCallbacks.getWidth = RunDelegateGetWidthCallback;
-    
     //存放所有图片的索引位置
     NSMutableArray *ranges = [NSMutableArray array];
     for (NSString *imageUrl in [self imagesOfRegexStrArray]) {
@@ -519,7 +496,7 @@ CGFloat RunDelegateGetDescentCallback(void *refCon) {
     return 0;
 }
 //设置空白区域的宽度
-CGFloat RunDelegateGetWidthCallback(void *refCon){
+CGFloat RunDelegateGetWidthCallback(void *refCon) {
     //    NSString *imageName = (__bridge NSString *)refCon;
     //    return [UIImage imageNamed:imageName].size.width;
     NSNumber *fontSize = (__bridge NSNumber *)refCon;
@@ -527,8 +504,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 }
 #pragma mark - 检索当前链接文本
 //返回所有的链接字符串数组
-- (NSArray *)contentsOfRegexStrArray
-{
+- (NSArray *)contentsOfRegexStrArray {
     //需要添加链接字符串正则表达：@用户、http://、#话题#
     NSString *regex = [self.delegate contentsOfRegexStringWithSMLabel:self];
     
@@ -543,13 +519,11 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 }
 
 //获取所有链接文字的位置
-- (NSArray *)rangesOfContents:(NSArray *)contents
-{
+- (NSArray *)rangesOfContents:(NSArray *)contents {
     if (_ranges == nil) {
         _ranges = [[NSMutableArray alloc]init];
     }
     [_ranges removeAllObjects];
-    
     for (NSString *content in contents) {
         NSValue *lastValue = [_ranges lastObject];
         long location = [lastValue rangeValue].location + [lastValue rangeValue].length;
@@ -559,15 +533,10 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
         //添加到数组中
         [_ranges addObject:value];
     }
-    
     return _ranges;
 }
-
-
 #pragma mark - touch Action
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
-{
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     self.movieStringRange = NSMakeRange(0, 0);
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:self];
@@ -576,9 +545,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     if (range.length == 0) {
         // 点击的是非超链接文本
         //        [super touchesEnded:touches withEvent:event];
-        
         //NSLog(@"点击的不是超链接文本");
-        
         if ([self.delegate respondsToSelector:@selector(toucheEndNoLinkSMLabel:)]) {
             [self.delegate toucheEndNoLinkSMLabel:self];
         }
@@ -594,13 +561,11 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
-{
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     self.movieStringRange = NSMakeRange(0, 0);
 }
 //手指接触视图
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:self];
     //获取当前选中字符的范围
@@ -608,8 +573,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     self.movieStringRange = range;
     if (range.length == 0) {
         //        [super touchesBegan:touches withEvent:event];
-    }else
-    {
+    } else {
         //判断当前代理方法是否实现
         if ([self.delegate respondsToSelector:@selector(toucheBenginSMLabel:withContext:)]) {
             //获取当前点击字符串
@@ -618,12 +582,10 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
             [self.delegate toucheBenginSMLabel:self withContext:context];
         }
     }
-    
 }
 
 // 想实现滑动效果
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
-{
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint point = [touch locationInView:self];
     //获取当前选中字符的范围
@@ -635,8 +597,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 
 #pragma mark - 检索当前点击的是否是链接文本
 //检查当前点击的是否是连接文本,如果是返回文本的位置
-- (NSRange)touchInLabelText:(CGPoint)point
-{
+- (NSRange)touchInLabelText:(CGPoint)point {
     //获取当前的行高
     float lineHeight = self.lineHeight + self.linespace;
     
@@ -657,16 +618,11 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     //        return NSMakeRange(0, 0);
     //    }
     
-    
     //获取当前行
     CTLineRef selectLine = CFArrayGetValueAtIndex((__bridge CFArrayRef)_row, indexLine);
     CFIndex selectCharIndex = CTLineGetStringIndexForPosition(selectLine, point);
-    
-    
     //获取当前行结束字符位置
     CFIndex endIndex = CTLineGetStringIndexForPosition(selectLine, CGPointMake(self.frame.size.width-1, 1));
-    
-    
     //获取整段文字中charIndex位置的字符相对line的原点的x值
     CGFloat beginset;
     do {
@@ -683,12 +639,10 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
             CTLineGetOffsetForStringIndex(selectLine,selectCharIndex + 1,&endset);
             if (point.x <= endset) {
                 break;
-            }else
-            {
+            }else {
                 selectCharIndex++;
             }
-        }else
-        {
+        }else {
             selectCharIndex--;
         }
         
@@ -701,15 +655,12 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
             return range;
         }
     }
-    
-    
     return NSMakeRange(0, 0);
 }
 
 #pragma mark - 当前手指触摸文本
 //复写当前选中的链接文本的索引
-- (void)setMovieStringRange:(NSRange)movieStringRange
-{
+- (void)setMovieStringRange:(NSRange)movieStringRange {
     if (_movieStringRange.location != movieStringRange.location || _movieStringRange.length != movieStringRange.length) {
         _movieStringRange = movieStringRange;
         [self setNeedsDisplay];
@@ -717,8 +668,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
 }
 
 // 自适应内容的高度
-- (void)sm_sizeToFit
-{
+- (void)sm_sizeToFit {
     // 获取当前内容文本的高度
     CGFloat height = [SMLabel sm_getStringHeightWithString:self.text
                                                      width:self.frame.size.width
@@ -739,8 +689,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
                               linespace:(CGFloat) linespace
                              lineHeight:(CGFloat) lineHeight
                                    font:(UIFont * _Nonnull)font
-                               delegate:(id<SMLabelDelegate> _Nullable)delegate
-{
+                               delegate:(id<SMLabelDelegate> _Nullable)delegate {
     
     //生成属性字符串对象
     NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc]initWithString:text];
@@ -802,7 +751,6 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     alignmentStyle.valueSize=sizeof(alignment);
     alignmentStyle.value=&alignment;
     
-    
     //行距
     CTParagraphStyleSetting lineSpaceSetting;
     lineSpaceSetting.spec = kCTParagraphStyleSpecifierLineSpacingAdjustment;
@@ -849,46 +797,22 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     //生成CTFramesetterRef对象
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CGRect drawingRect = CGRectMake(0, 0, width, kSMLabel_MAXHEIGHT);  //这里的高要设置足够大
+    CGRect drawingRect = CGRectMake(0, 0, width, CGFLOAT_MAX);  //这里的高要设置足够大
     
     //然后创建一个CGPath对象，这个Path对象用于表示可绘制区域坐标值、长宽。
     CGMutablePathRef path = CGPathCreateMutable();
     CGPathAddRect(path, NULL, drawingRect);
-    
-    
+
     CTFrameRef textFrame = CTFramesetterCreateFrame(framesetter,CFRangeMake(0,0), path, NULL);
     CGPathRelease(path);
     CFRelease(framesetter);
     
     NSArray *linesArray = (NSArray *) CTFrameGetLines(textFrame);
     return linesArray.count * lineHeight + (linesArray.count - 1) * (linespace);
-    
-    /*
-     CGPoint origins[[linesArray count]];
-     
-     CTFrameGetLineOrigins(textFrame, CFRangeMake(0, 0), origins);
-     
-     int line_y = (int) origins[[linesArray count] -1].y;  //最后一行line的原点y坐标
-     
-     CGFloat ascent;
-     CGFloat descent;
-     CGFloat leading;
-     
-     CTLineRef line = (__bridge CTLineRef) [linesArray objectAtIndex:[linesArray count]-1];
-     CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-     
-     total_height = kSMLabel_MAXHEIGHT - line_y + (int) descent + 1;    //+1为了纠正descent转换成int小数点后舍去的值
-     
-     CFRelease(textFrame);
-     
-     return total_height;
-     */
-    
 }
 
 #pragma mark - 正则表达式
-+ (NSMutableArray *)matchLinkWithStr:(NSString *)str withMatchStr:(NSString *)matchRegex;
-{
++ (NSMutableArray *)matchLinkWithStr:(NSString *)str withMatchStr:(NSString *)matchRegex {
     NSError *error = NULL;
     NSRegularExpression *reg = [NSRegularExpression regularExpressionWithPattern:matchRegex
                                                                          options:NSRegularExpressionCaseInsensitive
@@ -899,10 +823,8 @@ CGFloat RunDelegateGetWidthCallback(void *refCon){
     
     NSMutableArray *mulArr = [NSMutableArray array];
     // 取得所有的NSRange对象
-    if(match.count != 0)
-    {
-        for (NSTextCheckingResult *matc in match)
-        {
+    if (match.count != 0) {
+        for (NSTextCheckingResult *matc in match) {
             NSRange range = [matc range];
             [mulArr addObject:[str substringWithRange:range]];
         }

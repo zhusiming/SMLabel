@@ -33,7 +33,7 @@
     // 设置视图的大小
     label.frame = CGRectMake(0, 100, 320, 80);
     // 视图大小自适应内容大小
-//    [label sm_sizeToFit];
+    [label sm_sizeToFit];
 
     [self.view addSubview:label];
 }
