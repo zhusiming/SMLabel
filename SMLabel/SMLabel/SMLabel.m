@@ -16,8 +16,8 @@
 void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     if ([self isKindOfClass:[SMLabel class]]) {
         SMLabel *thisSelf = self;
-        if ([thisSelf.delegate respondsToSelector:@selector(menuItemsTouchUpIndexWithSMLabel:menuItemAction:sender:)]) {
-            [thisSelf.delegate menuItemsTouchUpIndexWithSMLabel:self menuItemAction:_cmd sender:param];
+        if ([thisSelf.delegate respondsToSelector:@selector(sm_label:menuItemsAction:sender:)]) {
+            [thisSelf.delegate sm_label:self menuItemsAction:_cmd sender:param];
         }
     }
 //    NSLog(@"调用eat %@ %@ %@",self,NSStringFromSelector(_cmd),param);
@@ -81,8 +81,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 
 - (void)longPressAction:(UILongPressGestureRecognizer *)longPress {
     if (longPress.state == UIGestureRecognizerStateBegan) {
-        if ([self.delegate respondsToSelector:@selector(menuItemsWithSMLabel:)]) {
-            self.menuItems = [self.delegate menuItemsWithSMLabel:self];
+        if ([self.delegate respondsToSelector:@selector(sm_menuItemsOfLabel:)]) {
+            self.menuItems = [self.delegate sm_menuItemsOfLabel:self];
             [self becomeFirstResponder];
             // 控制好menu的显示与隐藏
             UIMenuController *menuVC = [UIMenuController sharedMenuController];
@@ -91,8 +91,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
             }
             menuVC.menuItems = self.menuItems;
             /// 显示menuController的时候的背景色 default = [UIColor lightGrayColor]
-            if ([self.delegate respondsToSelector:@selector(menuControllerDidShowColorWithSMLabel:)]) {
-                self.backgroundColor = [self.delegate menuControllerDidShowColorWithSMLabel:self];
+            if ([self.delegate respondsToSelector:@selector(sm_menuControllerDidShowColorOfLabel:)]) {
+                self.backgroundColor = [self.delegate sm_menuControllerDidShowColorOfLabel:self];
             } else {
                 self.backgroundColor = [UIColor lightGrayColor];
             }
@@ -127,8 +127,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 // 菜单视图将要消失
 - (void)menuControllerWillHide {
     /// 隐藏menuController的时候的背景色 default = [UIColor clearColor]
-    if ([self.delegate respondsToSelector:@selector(menuControllerDidCloseColorWithSMLabel:)]) {
-        self.backgroundColor = [self.delegate menuControllerDidCloseColorWithSMLabel:self];
+    if ([self.delegate respondsToSelector:@selector(sm_menuControllerWillHiddenColorOfLabel:)]) {
+        self.backgroundColor = [self.delegate sm_menuControllerWillHiddenColorOfLabel:self];
     } else {
         self.backgroundColor = [UIColor clearColor];
     }
@@ -150,15 +150,15 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     //当前文本超链接文字的颜色默认为purpleColor
     self.linkColor = [UIColor purpleColor];
     //自定义当前超链接文本颜色
-    if ([self.delegate respondsToSelector:@selector(linkColorWithSMLabel:)]) {
-        self.linkColor = [self.delegate linkColorWithSMLabel:self];
+    if ([self.delegate respondsToSelector:@selector(sm_linkColorOfLabel:)]) {
+        self.linkColor = [self.delegate sm_linkColorOfLabel:self];
     }
     
     //当前文本超链接文字手指经过的颜色默认为greenColor
     self.passColor = [UIColor greenColor];
     //自定义当前超链接文本颜色
-    if ([self.delegate respondsToSelector:@selector(passColorWithSMLabel:)]) {
-        self.passColor = [self.delegate passColorWithSMLabel:self];
+    if ([self.delegate respondsToSelector:@selector(sm_passColorOfLabel:)]) {
+        self.passColor = [self.delegate sm_passColorOfLabel:self];
     }
     if (self.text == nil) {
         return;
@@ -177,7 +177,7 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
     
     //----------------------设置链接文本的颜色-------------------
     //判断当前链接文本表达式是否实现
-    if ([self.delegate respondsToSelector:@selector(contentsOfRegexStringWithSMLabel:)] && [self.delegate contentsOfRegexStringWithSMLabel:self] != nil)
+    if ([self.delegate respondsToSelector:@selector(sm_regexStringHyperlinkOfLabel:)] && [self.delegate sm_regexStringHyperlinkOfLabel:self] != nil)
     {
         //获取所有的链接文本
         NSArray *contents = [self contentsOfRegexStrArray];
@@ -431,8 +431,8 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
 - (NSArray *)imagesOfRegexStrArray {
     //需要添加图片正则表达，默认为@"<image url = '[a-zA-Z0-9_\\.@%&\\S]*'>"
     NSString *regex = @"<image url = '[a-zA-Z0-9_\\.@%&\\S]*'>";
-    if ([self.delegate respondsToSelector:@selector(imagesOfRegexStringWithSMLabel:)]) {
-        regex = [self.delegate imagesOfRegexStringWithSMLabel:self];
+    if ([self.delegate respondsToSelector:@selector(sm_regexStringImageOfLabel:)]) {
+        regex = [self.delegate sm_regexStringImageOfLabel:self];
     }
     
     //通过正则表达式查找出匹配的字符串
@@ -506,7 +506,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon) {
 //返回所有的链接字符串数组
 - (NSArray *)contentsOfRegexStrArray {
     //需要添加链接字符串正则表达：@用户、http://、#话题#
-    NSString *regex = [self.delegate contentsOfRegexStringWithSMLabel:self];
+    NSString *regex = [self.delegate sm_regexStringHyperlinkOfLabel:self];
     
     //通过正则表达式查找出匹配的字符串
     NSArray *matchArray = [SMLabel matchLinkWithStr:[self.attrString string] withMatchStr:regex];
@@ -546,16 +546,16 @@ CGFloat RunDelegateGetWidthCallback(void *refCon) {
         // 点击的是非超链接文本
         //        [super touchesEnded:touches withEvent:event];
         //NSLog(@"点击的不是超链接文本");
-        if ([self.delegate respondsToSelector:@selector(toucheEndNoLinkSMLabel:)]) {
-            [self.delegate toucheEndNoLinkSMLabel:self];
+        if ([self.delegate respondsToSelector:@selector(sm_label:didTouche:)]) {
+            [self.delegate sm_label:self didTouche:touch];
         }
     } else {
         //判断当前代理方法是否实现
-        if ([self.delegate respondsToSelector:@selector(toucheEndSMLabel:withContext:)]) {
+        if ([self.delegate respondsToSelector:@selector(sm_label:didToucheHyperlinkText:)]) {
             //获取当前点击字符串
             NSString *context = [[self.attrString string] substringWithRange:range];
             //调用点击开始代理方法
-            [self.delegate toucheEndSMLabel:self withContext:context];
+            [self.delegate sm_label:self didToucheHyperlinkText:context];
         }
     }
     
@@ -575,11 +575,11 @@ CGFloat RunDelegateGetWidthCallback(void *refCon) {
         //        [super touchesBegan:touches withEvent:event];
     } else {
         //判断当前代理方法是否实现
-        if ([self.delegate respondsToSelector:@selector(toucheBenginSMLabel:withContext:)]) {
+        if ([self.delegate respondsToSelector:@selector(sm_label:willToucheHyperlinkText:)]) {
             //获取当前点击字符串
             NSString *context = [[self.attrString string] substringWithRange:range];
             //调用点击开始代理方法
-            [self.delegate toucheBenginSMLabel:self withContext:context];
+            [self.delegate sm_label:self willToucheHyperlinkText:context];
         }
     }
 }
@@ -705,8 +705,8 @@ CGFloat RunDelegateGetWidthCallback(void *refCon) {
     //存放所有图片的索引位置
     NSMutableArray *ranges = [NSMutableArray array];
     NSString *regex = @"<image url = '[a-zA-Z0-9_\\.@%&\\S]*'>";
-    if ([delegate respondsToSelector:@selector(imagesOfRegexStringWithSMLabel:)]) {
-        regex = [delegate imagesOfRegexStringWithSMLabel:nil];
+    if ([delegate respondsToSelector:@selector(sm_regexStringImageOfLabel:)]) {
+        regex = [delegate sm_regexStringImageOfLabel:nil];
     }
     
     //通过正则表达式查找出匹配的字符串
