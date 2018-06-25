@@ -797,7 +797,7 @@ CGFloat RunDelegateGetWidthCallback(void *refCon) {
     
     //生成CTFramesetterRef对象
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CGRect drawingRect = CGRectMake(0, 0, width, CGFLOAT_MAX);  //这里的高要设置足够大
+    CGRect drawingRect = CGRectMake(0, 0, width, 10000);  //这里的高要设置足够大
     
     //然后创建一个CGPath对象，这个Path对象用于表示可绘制区域坐标值、长宽。
     CGMutablePathRef path = CGPathCreateMutable();
@@ -808,7 +808,25 @@ CGFloat RunDelegateGetWidthCallback(void *refCon) {
     CFRelease(framesetter);
     
     NSArray *linesArray = (NSArray *) CTFrameGetLines(textFrame);
-    return linesArray.count * lineHeight + (linesArray.count - 1) * (linespace);
+//    return linesArray.count * lineHeight + (linesArray.count - 1) * (linespace);
+    
+    CGPoint origins[[linesArray count]];
+    CTFrameGetLineOrigins(textFrame, CFRangeMake(0, 0), origins);
+    
+    int line_y = (int) origins[[linesArray count] -1].y;  //最后一行line的原点y坐标
+    
+    CGFloat ascent;
+    CGFloat descent;
+    CGFloat leading;
+    
+    CTLineRef line = (__bridge CTLineRef) [linesArray objectAtIndex:[linesArray count]-1];
+    CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+    
+    int total_height = 10000 - line_y + (int) descent +1;    //+1为了纠正descent转换成int小数点后舍去的值
+    
+    CFRelease(textFrame);
+    
+    return total_height;
 }
 
 #pragma mark - 正则表达式
