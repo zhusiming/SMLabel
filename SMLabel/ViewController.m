@@ -23,6 +23,7 @@
     SMLabel *label = [[SMLabel alloc] initWithFrame:CGRectMake(0, 100, 320, 200)];
     label.lineHeight = 20;
     label.linespace = 10;
+    label.linkUnderline = true;
     // 设置代理对象
     label.delegate = self;
     label.font = [UIFont systemFontOfSize:14];

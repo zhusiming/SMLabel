@@ -189,6 +189,9 @@ void smLabelMenuControllerAction(id self, SEL _cmd, id param) {
             NSRange range = [value rangeValue];
             //设置字体的颜色
             [_attrString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.linkColor range:range];
+            if (self.linkUnderline == true) {
+                [_attrString addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInteger:NSUnderlineStyleSingle] range:range];
+            }
         }
         //设置选中经过字体颜色
         [_attrString addAttribute:(id)kCTForegroundColorAttributeName value:(id)self.passColor range:self.movieStringRange];

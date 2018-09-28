@@ -67,9 +67,13 @@
 
 @interface SMLabel : UILabel
 /// @property(nonatomic, assign)BOOL isOpen;   //是否显示展开按钮
-@property(nonatomic, assign)id<SMLabelDelegate> _Nonnull delegate;   //代理对象
-@property(nonatomic, assign)CGFloat linespace;    //行间距      0
-@property(nonatomic, assign)CGFloat lineHeight;   //行高        default = 当前字体的大小  如何设置行高小于字体大小时，行高默认为字体大小
+@property(nonatomic, assign) id<SMLabelDelegate> _Nonnull delegate;   //代理对象
+/// 行间距   default = 0
+@property(nonatomic, assign) CGFloat linespace;
+/// 行高     default = 当前字体的大小  如何设置行高小于字体大小时，行高默认为字体大小
+@property(nonatomic, assign) CGFloat lineHeight;
+/// 连接文本是否显示下划线 default = false
+@property(nonatomic, assign) BOOL linkUnderline;
 
 ///  自适应内容的高度
 - (void)sm_sizeToFit;
