@@ -43,6 +43,7 @@ end
 
 # 3.看自己有没有注册
 # pod trunk me
+# 注册 pod trunk register 邮箱 '用户名'
 
 # 4.创建podspec文件
 # pod spec create SMLabel
